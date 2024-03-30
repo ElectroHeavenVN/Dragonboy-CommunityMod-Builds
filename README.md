@@ -12,7 +12,7 @@ __Lưu ý__: file iOS là dự án Xcode, không phải file ipa có thể cài 
 - Tại phần `Repository secrets`, nhấn `New repository secrets`
 - Ở trường `Name`, nhập `UNITY_EMAIL`, trường `Secret` là email Unity của bạn
 - Nhấn `Add secret` để thêm secret
-- Làm tương tự các bước trên với giá trị của trường `Name` và trường `Secret` lần lượt như sau:
+- Làm lại các bước trên với giá trị của trường `Name` và trường `Secret` lần lượt như sau:
     + `UNITY_PASSWORD`: mật khẩu Unity của bạn
     + `UNITY_LICENSE`: nội dung tệp `Unity_lic.ulf` (tham khảo tài liệu của [GameCI](https://game.ci/) [tại đây](https://game.ci/docs/github/activation/#activating-a-license-file) để biết đường dẫn tệp `Unity_lic.ulf`)
     + `ANDROID_KEYSTORE_BASE64`: nội dung tệp keystore đã mã hóa base64 của bạn
