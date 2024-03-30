@@ -51,13 +51,13 @@ jobs:
     - name: Setup NuGet
       uses: nuget/setup-nuget@v2
     - name: Restore project
-      run: msbuild $env:Solution-Path /t:Restore /p:Configuration=$env:Configuration
+      run: msbuild ${{ env.Solution-Path }} /t:Restore /p:Configuration=$env:Configuration
       env:
         Configuration: ${{ matrix.configuration }}
     - name: Restore NuGet Packages
-      run: nuget restore $env:Solution-Path
+      run: nuget restore ${{ env.Solution-Path }}
     - name: Build dự án
-      run: msbuild $env:Solution-Path -t:rebuild -property:Configuration=$env:Configuration
+      run: msbuild ${{ env.Solution-Path }} -t:rebuild -property:Configuration=$env:Configuration
       env:
         Configuration: ${{ matrix.configuration }}
     - name: Upload file đã build
