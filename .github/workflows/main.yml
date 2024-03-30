@@ -1,0 +1,132 @@
+name: Build dự án
+
+# on: [push, pull_request]
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+jobs:
+  check-commit:
+    name: Kiểm tra commit mới
+    runs-on: windows-latest
+    outputs:
+      cancel: ${{ steps.check_hash.outputs.cancel }}
+    strategy:
+      fail-fast: false
+    steps:
+      - name: Clone pk9r327/Dragonboy branch Unity-project
+        uses: actions/checkout@v4.1.1
+        with:
+          repository: pk9r327/Dragonboy
+          ref: Unity-project
+      - name: Cache commit mới nhất
+        uses: actions/cache@v4.0.2
+        with:
+          path: latest-commit.txt
+          key: latest-commit
+          restore-keys: latest-commit
+      - name: kiểm tra hash
+        id: check_hash
+        run: $hash = git rev-parse HEAD; if ((Test-Path \"latest-commit.txt\" -PathType Leaf)) { $commitContent = Get-Content -Path "latest-commit.txt"; $cancel = ($commitContent -eq $hash).ToString().ToLower(); } else { $cancel = "False" } $output = "cancel=$cancel".ToString().ToLower(); echo $output | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
+      - name: Lấy hash commit mới nhất 
+        run: git rev-parse HEAD > latest-commit.txt
+
+  build-Windows:
+    name: Build ${{ matrix.targetPlatform }} ${{matrix.scriptingBackend}} trên máy chủ Windows
+    needs: [check-commit]
+    if: needs.check-commit.outputs.cancel == 'false'
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        targetPlatform:
+          - StandaloneWindows 
+          - StandaloneWindows64 
+        scriptingBackend:
+          - Mono # 0
+          - IL2CPP # 1
+    steps:
+      - name: Clone pk9r327/Dragonboy branch Unity-project
+        uses: actions/checkout@v4.1.1
+        with:
+          repository: pk9r327/Dragonboy
+          ref: Unity-project
+      - name: Cache
+        uses: actions/cache@v4.0.2
+        with:
+          path: GameProject/DragonBoy/Library
+          key: Library-${{matrix.targetPlatform}}
+          restore-keys: Library-
+      - name: Đổi scripting backend thành ${{matrix.scriptingBackend}}
+        run: cd GameProject && pwsh ./set_scripting_backend.ps1 -projectSettingsPath "DragonBoy/ProjectSettings/ProjectSettings.asset" -platform ${{ matrix.targetPlatform }} -scriptingBackend ${{matrix.scriptingBackend}} || powershell ./set_scripting_backend.ps1 -projectSettingsPath "DragonBoy/ProjectSettings/ProjectSettings.asset" -platform ${{ matrix.targetPlatform }} -scriptingBackend ${{matrix.scriptingBackend}};     
+      - name: Build dự án
+        uses: game-ci/unity-builder@v4.2.3
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: ${{ matrix.targetPlatform }}
+          projectPath: GameProject/DragonBoy
+          buildName: DragonBoy
+          allowDirtyBuild: true          
+      - name: Upload file game đã build
+        uses: actions/upload-artifact@v3
+        with:
+          name: Build-${{ matrix.targetPlatform }}-${{matrix.scriptingBackend}}
+          path: build/${{ matrix.targetPlatform }}
+  build-Linux:
+    name: Build ${{ matrix.targetPlatform }} ${{matrix.scriptingBackend}} trên máy chủ Linux
+    needs: [check-commit]
+    if: needs.check-commit.outputs.cancel == 'false'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        targetPlatform:
+          - StandaloneLinux64
+          - Android
+          - iOS
+        scriptingBackend:
+          - Mono # 0
+          - IL2CPP # 1 
+    steps: 
+      - name: Clone pk9r327/Dragonboy branch Unity-project
+        uses: actions/checkout@v4.1.1
+        with:
+          repository: pk9r327/Dragonboy
+          ref: Unity-project
+      - name: Cache
+        uses: actions/cache@v4.0.2
+        with:
+          path: GameProject/DragonBoy/Library
+          key: Library-${{ matrix.targetPlatform }}
+          restore-keys: Library-
+      - name: Đổi scripting backend thành ${{matrix.scriptingBackend}}
+        run: cd GameProject && chmod +x set_scripting_backend.sh && ./set_scripting_backend.sh "DragonBoy/ProjectSettings/ProjectSettings.asset" "${{ matrix.targetPlatform }}" "${{matrix.scriptingBackend}}"
+      - if: ${{ matrix.targetPlatform == 'Android' }} 
+        name: Giải phóng bộ nhớ (Build Android)
+        uses: jlumbroso/free-disk-space@v1.3.1
+      - name: Build dự án
+        uses: game-ci/unity-builder@v4.2.3
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: ${{ matrix.targetPlatform }}
+          androidKeystoreName: DragonBoy-pk9r327-UnityProject.keystore # This file won't exist, but this property needs to exist.
+          androidKeystoreBase64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          androidKeystorePass: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+          androidKeyaliasName: ${{ secrets.ANDROID_KEYALIAS_NAME }}
+          androidKeyaliasPass: ${{ secrets.ANDROID_KEYALIAS_PASS }}
+          androidTargetSdkVersion: AndroidApiLevel33
+          projectPath: GameProject/DragonBoy
+          buildName: DragonBoy
+          allowDirtyBuild: true
+      - name: Upload file game đã build
+        uses: actions/upload-artifact@v3
+        with:
+          name: Build-${{ matrix.targetPlatform }}-${{matrix.scriptingBackend}}
+          path: build/${{ matrix.targetPlatform }}
