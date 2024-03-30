@@ -33,6 +33,7 @@ jobs:
         run: git rev-parse HEAD > latest-commit.txt
   build-Account-Manager:
     name: Build QLTK (Windows, .NET 8.0)
+    needs: [check-commit]
     strategy:
       matrix:
         configuration: [Debug, Release]
