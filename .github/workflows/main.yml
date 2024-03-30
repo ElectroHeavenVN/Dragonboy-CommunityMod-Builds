@@ -28,7 +28,7 @@ jobs:
           restore-keys: latest-commit
       - name: kiểm tra hash
         id: check_hash
-        run: $hash = git rev-parse HEAD; if ((Test-Path latest-commit.txt -PathType Leaf)) { $commitContent = Get-Content -Path latest-commit.txt; $output = ($commitContent -eq $hash).ToString().ToLower(); } else { $output = "False" } $output = "cancel=$output".ToString().ToLower(); echo $output | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
+        run: $hash = git rev-parse HEAD; if ((Test-Path latest-commit.txt -PathType Leaf)) { $commitContent = Get-Content -Path latest-commit.txt; $output = ($commitContent -eq $hash).ToString().ToLower(); } else { $output = "false" } $output = "cancel=$output".ToString().ToLower(); echo $output | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
       - name: Lấy hash commit mới nhất
         run: git rev-parse HEAD > latest-commit.txt
       - run: git rev-parse HEAD
@@ -36,6 +36,7 @@ jobs:
   build-Account-Manager:
     name: Build QLTK (Windows, .NET 8.0)
     needs: [check-commit]
+    if: needs.check-commit.outputs.cancel == 'false'
     strategy:
       matrix:
         configuration: [Debug, Release]
@@ -43,6 +44,7 @@ jobs:
     env:
       Solution-Path: QLTK\QLTK.sln
     steps:
+    - run: echo ${{ needs.check-commit.outputs.cancel }}
     - name: Clone pk9r327/Dragonboy branch Unity-project
       uses: actions/checkout@v4.1.1
       with:
