@@ -32,7 +32,7 @@ jobs:
       - run: Test-Path latest-commit.txt -PathType Leaf
       - run: dir
       - run: $hash = git rev-parse HEAD; if ((Test-Path latest-commit.txt -PathType Leaf)) { $commitContent = Get-Content -Path latest-commit.txt; $output = ($commitContent -eq $hash).ToString().ToLower(); } else { $output = "false" } $output = "cancel=$output".ToString().ToLower(); echo $output
-      # - run: cat latest-commit.txt
+      - run: cat latest-commit.txt
       - run: git rev-parse HEAD
       - name: Lấy hash commit mới nhất
         run: git rev-parse HEAD > latest-commit.txt
