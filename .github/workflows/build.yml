@@ -32,7 +32,7 @@ jobs:
       - name: Lấy hash commit mới nhất
         run: git rev-parse HEAD > latest-commit.txt
   build-Account-Manager:
-    name: Build QLTK (Windows, .NET 8.0)
+    name: Biên dịch QLTK (Windows, .NET 8.0)
     needs: [check-commit]
     if: needs.check-commit.outputs.cancel == 'false'
     strategy:
@@ -57,17 +57,17 @@ jobs:
         Configuration: ${{ matrix.configuration }}
     - name: Restore NuGet Packages
       run: nuget restore ${{ env.Solution-Path }}
-    - name: Build dự án
+    - name: Biên dịch dự án
       run: msbuild ${{ env.Solution-Path }} -t:rebuild -property:Configuration=$env:Configuration
       env:
         Configuration: ${{ matrix.configuration }}
-    - name: Upload file đã build
+    - name: Upload file đã biên dịch
       uses: actions/upload-artifact@v4.3.1
       with:
         name: QLTK_${{ matrix.configuration }}
         path: QLTK/bin/${{ matrix.configuration }}
   build-Unity-Windows:
-    name: Build game cho nền tảng ${{ matrix.targetPlatform }} ${{matrix.scriptingBackend}} trên máy chủ Windows
+    name: Biên dịch ${{ matrix.targetPlatform }} ${{matrix.scriptingBackend}} trên máy chủ Windows
     needs: [check-commit]
     if: needs.check-commit.outputs.cancel == 'false'
     runs-on: windows-latest
@@ -94,7 +94,7 @@ jobs:
           restore-keys: Library-
       - name: Đổi scripting backend thành ${{matrix.scriptingBackend}}
         run: cd GameProject && pwsh ./set_scripting_backend.ps1 -projectSettingsPath "DragonBoy/ProjectSettings/ProjectSettings.asset" -platform ${{ matrix.targetPlatform }} -scriptingBackend ${{matrix.scriptingBackend}} || powershell ./set_scripting_backend.ps1 -projectSettingsPath "DragonBoy/ProjectSettings/ProjectSettings.asset" -platform ${{ matrix.targetPlatform }} -scriptingBackend ${{matrix.scriptingBackend}};     
-      - name: Build dự án
+      - name: Biên dịch dự án
         uses: game-ci/unity-builder@v4.2.3
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
@@ -105,13 +105,13 @@ jobs:
           projectPath: GameProject/DragonBoy
           buildName: DragonBoy
           allowDirtyBuild: true          
-      - name: Upload file game đã build
+      - name: Upload file game đã biên dịch
         uses: actions/upload-artifact@v3
         with:
           name: Build-${{ matrix.targetPlatform }}-${{matrix.scriptingBackend}}
           path: build/${{ matrix.targetPlatform }}
   build-Unity-Linux:
-    name: Build game cho nền tảng ${{ matrix.targetPlatform }} ${{matrix.scriptingBackend}} trên máy chủ Linux
+    name: Biên dịch ${{ matrix.targetPlatform }} ${{matrix.scriptingBackend}} trên máy chủ Linux
     needs: [check-commit]
     if: needs.check-commit.outputs.cancel == 'false'
     runs-on: ubuntu-latest
@@ -121,13 +121,9 @@ jobs:
         targetPlatform:
           - StandaloneLinux64
           - Android
-          - iOS
         scriptingBackend:
           - Mono # 0
           - IL2CPP # 1 
-        exclude:
-          - targetPlatform: iOS
-            scriptingBackend: Mono
     steps: 
       - name: Clone pk9r327/Dragonboy branch Unity-project
         uses: actions/checkout@v4.1.1
@@ -143,9 +139,9 @@ jobs:
       - name: Đổi scripting backend thành ${{matrix.scriptingBackend}}
         run: cd GameProject && chmod +x set_scripting_backend.sh && ./set_scripting_backend.sh "DragonBoy/ProjectSettings/ProjectSettings.asset" "${{ matrix.targetPlatform }}" "${{matrix.scriptingBackend}}"
       - if: ${{ matrix.targetPlatform == 'Android' }} 
-        name: Giải phóng bộ nhớ (Build Android)
+        name: Giải phóng bộ nhớ (Android build)
         uses: jlumbroso/free-disk-space@v1.3.1
-      - name: Build dự án
+      - name: Biên dịch dự án
         uses: game-ci/unity-builder@v4.2.3
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
@@ -162,7 +158,7 @@ jobs:
           projectPath: GameProject/DragonBoy
           buildName: DragonBoy
           allowDirtyBuild: true
-      - name: Upload file game đã build
+      - name: Upload file game đã biên dịch
         uses: actions/upload-artifact@v3
         with:
           name: Build-${{ matrix.targetPlatform }}-${{matrix.scriptingBackend}}
@@ -170,6 +166,7 @@ jobs:
   send-artifact-links-announcement:
     name: Gửi link artifact tới Discord webhook
     needs: [build-Unity-Windows, build-Unity-Linux, build-Account-Manager]
+    if: ${{ needs.build-Unity-Windows.result }} != 'cancelled' && ${{ needs.build-Unity-Linux.result }} != 'cancelled' && ${{ needs.build-Account-Manager.result }} != 'cancelled'
     runs-on: ubuntu-latest
     steps:
       - name: gọi API để lấy link artifact
@@ -184,7 +181,7 @@ jobs:
           {
             echo 'OUTPUT<<EOF'
             json='${{ steps.get_artifact_links.outputs.artifact-data }}'
-            output="### [${{ github.event.repository.name }}](https://github.com/${{ github.repository }})"$'\n'
+            output="### [${{ github.event.repository.name }}](https://github.com/${{ github.repository }}) - ${{ needs.*.result }}"$'\n'
             end_value=$(($(echo ${json} | jq '.artifacts | length') - 1))
             output="${output}$(echo ${json} | jq '.artifacts | length') Artifacts"$'\n'
             for i in $(seq 0 $end_value)

@@ -1,9 +1,8 @@
 # Dragonboy-CommunityMod-Builds
 tự động build [Dragonboy](https://github.com/pk9r327/Dragonboy/tree/Unity-project) bằng Github Actions.
+Các nền tảng được hỗ trợ: Windows, Linux, Android
 ## Tải xuống
 Chọn tab [Actions](https://github.com/ElectroHeavenVN/Dragonboy-CommunityMod-Builds/actions) sau đó chọn workflow chạy thành công mới nhất. Chọn file phù hợp với hệ điều hành của bạn trong phần `Artifacts`.
-
-__Lưu ý__: file iOS là dự án Xcode, không phải file ipa có thể cài đặt.
 
 ## Setup
 Để tự build dự án [Dragonboy](https://github.com/pk9r327/Dragonboy/tree/Unity-project) bằng Github Actions, bạn cần làm theo các bước sau:
