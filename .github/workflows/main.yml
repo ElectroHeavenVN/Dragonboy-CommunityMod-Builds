@@ -185,7 +185,7 @@ jobs:
         id: create_discord_message
         run: |
           echo -n "discord-message=" >> "GITHUB_OUTPUT"
-          for i in {1..$(${{ steps.get_artifact_links.outputs.artifact-data }} | jq '.artifacts | length')} 
+          for i in {1..$(echo ${{ steps.get_artifact_links.outputs.artifact-data }} | jq '.artifacts | length')} 
           do
             echo -n [ >> "GITHUB_OUTPUT"
             echo -n $(echo ${{ steps.get_artifact_links.outputs.artifact-data }} | jq '.artifacts[$i].name') >> "GITHUB_OUTPUT"
