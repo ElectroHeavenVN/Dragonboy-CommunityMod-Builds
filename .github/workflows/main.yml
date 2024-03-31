@@ -179,8 +179,9 @@ jobs:
         id: get_artifact_links
         run: |
           artifactsUrl=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/actions/runs?per_page=1 | jq '.workflow_runs[0].artifacts_url')
-          echo -n "artifact-data=" >> "$GITHUB_OUTPUT"
-          echo -n $(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" $artifactsUrl) >> "$GITHUB_OUTPUT"
+          output="artifact-data="
+          output="${output}$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" $artifactsUrl)
+          echo $output >> "$GITHUB_OUTPUT"
       - name: Tạo thông báo để gửi tới Discord webhook
         id: create_discord_message
         run: |
@@ -197,8 +198,8 @@ jobs:
             output="${output}$(echo ${json} | jq ".artifacts[${i}].id")"
             output="${output}\)\n"
           done
-          echo $output >> $GITHUB_OUTPUT
           echo $output
+          echo $output >> $GITHUB_OUTPUT
       - run: echo ${{ steps.create_discord_message.outputs.discord-message }}
       # - name: Gửi thông báo tới Discord webhook
       #   uses: sarisia/actions-status-discord@v1.14.0
