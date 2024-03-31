@@ -184,15 +184,17 @@ jobs:
       - name: Tạo thông báo để gửi tới Discord webhook
         id: create_discord_message
         run: |
+          json='${{ steps.get_artifact_links.outputs.artifact-data }}'
           output="discord-message="
-          for i in {0..$(echo ${{ steps.get_artifact_links.outputs.artifact-data }} | jq '.artifacts | length')} 
+          end_value=$(($(echo ${json} | jq '.artifacts | length') - 1))
+          for i in $(seq 0 $end_value)
           do
-            output="${output} ["
-            output="${output}$(echo ${{ steps.get_artifact_links.outputs.artifact-data }} | jq ".artifacts[${i}].name")"
+            output="${output}["
+            output="${output}$(echo ${json} | jq ".artifacts[${i}].name")"
             output="${output}]\(https://github.com/${{ github.repository }}/actions/runs/"
-            output="${output}$(echo ${{ steps.get_artifact_links.outputs.artifact-data }} | jq ".artifacts[${i}].workflow_run.id")"
+            output="${output}$(echo ${json} | jq ".artifacts[${i}].workflow_run.id")"
             output="${output}/artifacts/"
-            output="${output}$(echo ${{ steps.get_artifact_links.outputs.artifact-data }} | jq ".artifacts[${i}].id")"
+            output="${output}$(echo ${json} | jq ".artifacts[${i}].id")"
             output="${output}\)\n"
           done
           echo "output<<EOF" >> $GITHUB_OUTPUT
