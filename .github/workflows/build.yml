@@ -106,7 +106,7 @@ jobs:
           buildName: DragonBoy
           allowDirtyBuild: true          
       - name: Upload file game đã biên dịch
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4.3.1
         with:
           name: Build-${{ matrix.targetPlatform }}-${{matrix.scriptingBackend}}
           path: build/${{ matrix.targetPlatform }}
@@ -159,7 +159,7 @@ jobs:
           buildName: DragonBoy
           allowDirtyBuild: true
       - name: Upload file game đã biên dịch
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4.3.1
         with:
           name: Build-${{ matrix.targetPlatform }}-${{matrix.scriptingBackend}}
           path: build/${{ matrix.targetPlatform }}
@@ -181,9 +181,13 @@ jobs:
           {
             echo 'OUTPUT<<EOF'
             json='${{ steps.get_artifact_links.outputs.artifact-data }}'
-            output="### [${{ github.event.repository.name }}](https://github.com/${{ github.repository }}) - ${{ needs.*.result }}"$'\n'
+            output="### [${{ github.event.repository.name }}](https://github.com/${{ github.repository }})"$'\n'
             end_value=$(($(echo ${json} | jq '.artifacts | length') - 1))
-            output="${output}$(echo ${json} | jq '.artifacts | length') Artifacts"$'\n'
+            output="${output}Kết quả:"$'\n'
+            output="${output}- Biên dịch QLTK: **${{ needs.build-Account-Manager.result }}**"$'\n'
+            output="${output}- Biên dịch game trên Windows: **${{ needs.build-Unity-Windows.result }}**"$'\n'
+            output="${output}- Biên dịch game trên Linux: **${{ needs.build-Unity-Linux.result }}**"$'\n'
+            output="${output}$(echo ${json} | jq '.artifacts | length') Artifact:"$'\n'
             for i in $(seq 0 $end_value)
             do
               output="${output}["
@@ -204,5 +208,6 @@ jobs:
           nodetail: true
           nofail: true
           title: Mod Cộng Đồng - Auto Build
+          url: ${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}
           description: |
             ${{ env.OUTPUT }}
