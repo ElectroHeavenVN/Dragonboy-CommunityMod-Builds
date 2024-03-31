@@ -188,11 +188,11 @@ jobs:
           for i in {1..$(echo ${{ steps.get_artifact_links.outputs.artifact-data }} | jq '.artifacts | length')} 
           do
             output="${output} ["
-            output="${output}$(echo ${{ steps.get_artifact_links.outputs.artifact-data }} | jq '.artifacts[$i].name')"
+            output="${output}$(echo ${{ steps.get_artifact_links.outputs.artifact-data }} | jq '.artifacts[${i}].name')"
             output="${output}]\(https://github.com/${{ github.repository }}/actions/runs/"
-            output="${output}$(echo ${{ steps.get_artifact_links.outputs.artifact-data }} | jq '.artifacts[$i].workflow_run.id')"
+            output="${output}$(echo ${{ steps.get_artifact_links.outputs.artifact-data }} | jq '.artifacts[${i}].workflow_run.id')"
             output="${output}/artifacts/"
-            output="${output}$(echo ${{ steps.get_artifact_links.outputs.artifact-data }} | jq '.artifacts[$i].id')"
+            output="${output}$(echo ${{ steps.get_artifact_links.outputs.artifact-data }} | jq '.artifacts[${i}].id')"
             output="${output}\)\n"
           done
           echo "output<<EOF" >> $GITHUB_OUTPUT
