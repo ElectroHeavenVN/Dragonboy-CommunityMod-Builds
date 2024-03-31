@@ -198,6 +198,7 @@ jobs:
             output="${output}\)\n"
           done
           echo $output >> $GITHUB_OUTPUT
+          echo $output
       - run: echo ${{ steps.create_discord_message.outputs.discord-message }}
       # - name: Gửi thông báo tới Discord webhook
       #   uses: sarisia/actions-status-discord@v1.14.0
