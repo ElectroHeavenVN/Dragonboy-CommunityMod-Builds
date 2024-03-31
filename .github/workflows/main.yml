@@ -191,13 +191,13 @@ jobs:
           do
             output="${output}["
             output="${output}$(echo ${json} | jq -r ".artifacts[${i}].name")"
-            output="${output}]\(https://github.com/${{ github.repository }}/actions/runs/"
+            output="${output}](https://github.com/${{ github.repository }}/actions/runs/"
             output="${output}$(echo ${json} | jq -r ".artifacts[${i}].workflow_run.id")"
             output="${output}/artifacts/"
             output="${output}$(echo ${json} | jq -r ".artifacts[${i}].id")"
-            output="${output}\)\n"
+            output="${output}"')'$'\n"
           done
-          echo $output >> $GITHUB_OUTPUT
+          echo "$output" >> $GITHUB_OUTPUT
       - run: echo ${{ steps.create_discord_message.outputs.discord-message }}
       - name: Gửi thông báo tới Discord webhook
         uses: sarisia/actions-status-discord@v1.14.0
