@@ -125,6 +125,9 @@ jobs:
         scriptingBackend:
           - Mono # 0
           - IL2CPP # 1 
+        exclude:
+          - targetPlatform: iOS
+            scriptingBackend: Mono
     steps: 
       - name: Clone pk9r327/Dragonboy branch Unity-project
         uses: actions/checkout@v4.1.1
