@@ -184,9 +184,9 @@ jobs:
         id: create_discord_message
         run: |
           json='${{ steps.get_artifact_links.outputs.artifact-data }}'
-          output="discord-message=## [${{ github.event.repository.name }}](https://github.com/${{ github.repository }})\n"
+          output="discord-message=## [${{ github.event.repository.name }}](https://github.com/${{ github.repository }})"$'\n'
           end_value=$(($(echo ${json} | jq '.artifacts | length') - 1))
-          output="${output}$(echo ${json} | jq '.artifacts | length') Artifacts\n"
+          output="${output}$(echo ${json} | jq '.artifacts | length') Artifacts"$'\n'
           for i in $(seq 0 $end_value)
           do
             output="${output}["
@@ -197,8 +197,7 @@ jobs:
             output="${output}$(echo ${json} | jq -r ".artifacts[${i}].id")"
             output=$"${output}"')'$'\n'
           done
-          echo "$output"
-          echo "$output" >> $GITHUB_OUTPUT
+          echo $output >> $GITHUB_OUTPUT
       - name: Gửi thông báo tới Discord webhook
         uses: sarisia/actions-status-discord@v1.14.0
         with:
