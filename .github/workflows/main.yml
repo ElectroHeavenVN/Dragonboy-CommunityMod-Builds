@@ -181,24 +181,26 @@ jobs:
           output="${output}$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" $artifactsUrl)"
           echo $output >> "$GITHUB_OUTPUT"
       - name: Tạo thông báo để gửi tới Discord webhook
-        id: create_discord_message
         run: |
-          json='${{ steps.get_artifact_links.outputs.artifact-data }}'
-          output="discord-message=## [${{ github.event.repository.name }}](https://github.com/${{ github.repository }})"$'\n'
-          end_value=$(($(echo ${json} | jq '.artifacts | length') - 1))
-          output="${output}$(echo ${json} | jq '.artifacts | length') Artifacts"$'\n'
-          for i in $(seq 0 $end_value)
-          do
-            output="${output}["
-            output="${output}$(echo ${json} | jq -r ".artifacts[${i}].name")"
-            output="${output}](https://github.com/${{ github.repository }}/actions/runs/"
-            output="${output}$(echo ${json} | jq -r ".artifacts[${i}].workflow_run.id")"
-            output="${output}/artifacts/"
-            output="${output}$(echo ${json} | jq -r ".artifacts[${i}].id")"
-            output=$"${output}"')'$'\n'
-          done
-          echo "$output" 
-          echo "$output" >> $GITHUB_OUTPUT
+          {
+            echo 'OUTPUT<<EOF'
+            json='${{ steps.get_artifact_links.outputs.artifact-data }}'
+            output="=## [${{ github.event.repository.name }}](https://github.com/${{ github.repository }})"$'\n'
+            end_value=$(($(echo ${json} | jq '.artifacts | length') - 1))
+            output="${output}$(echo ${json} | jq '.artifacts | length') Artifacts"$'\n'
+            for i in $(seq 0 $end_value)
+            do
+              output="${output}["
+              output="${output}$(echo ${json} | jq -r ".artifacts[${i}].name")"
+              output="${output}](https://github.com/${{ github.repository }}/actions/runs/"
+              output="${output}$(echo ${json} | jq -r ".artifacts[${i}].workflow_run.id")"
+              output="${output}/artifacts/"
+              output="${output}$(echo ${json} | jq -r ".artifacts[${i}].id")"
+              output=$"${output}"')'$'\n'
+            done
+            echo "$output" 
+            echo EOF
+          } >> "$GITHUB_ENV"
       - name: Gửi thông báo tới Discord webhook
         uses: sarisia/actions-status-discord@v1.14.0
         with:
@@ -207,4 +209,4 @@ jobs:
           nofail: true
           title: Mod Cộng Đồng - Auto Build
           description: |
-            ${{ steps.create_discord_message.outputs.discord-message }}
+            ${{ env.OUTPUT }}
