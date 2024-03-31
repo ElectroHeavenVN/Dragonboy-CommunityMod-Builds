@@ -1,12 +1,12 @@
-# Dragonboy-pk9r327-Builds
-tự động build [Dragonboy-pk9r327](https://github.com/pk9r327/Dragonboy/tree/Unity-project) bằng Github Actions.
+# Dragonboy-CommunityMod-Builds
+tự động build [Dragonboy](https://github.com/pk9r327/Dragonboy/tree/Unity-project) bằng Github Actions.
 ## Tải xuống
-Chọn tab [Actions](https://github.com/ElectroHeavenVN/Dragonboy-pk9r327-Builds/actions) sau đó chọn workflow chạy thành công mới nhất. Chọn file phù hợp với hệ điều hành của bạn trong phần `Artifacts`.
+Chọn tab [Actions](https://github.com/ElectroHeavenVN/Dragonboy-CommunityMod-Builds/actions) sau đó chọn workflow chạy thành công mới nhất. Chọn file phù hợp với hệ điều hành của bạn trong phần `Artifacts`.
 
 __Lưu ý__: file iOS là dự án Xcode, không phải file ipa có thể cài đặt.
 
 ## Setup
-Để tự build dự án [Dragonboy-pk9r327](https://github.com/pk9r327/Dragonboy/tree/Unity-project) bằng Github Actions, bạn cần làm theo các bước sau:
+Để tự build dự án [Dragonboy](https://github.com/pk9r327/Dragonboy/tree/Unity-project) bằng Github Actions, bạn cần làm theo các bước sau:
 - Fork repository này
 - Vào phần `Settings` của repository bạn vừa fork, sau đó chọn phần `Actions` trong phần `Secrets and variables`
 - Tại phần `Repository secrets`, nhấn `New repository secrets`
