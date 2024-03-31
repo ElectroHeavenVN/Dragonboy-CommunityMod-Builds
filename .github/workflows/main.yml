@@ -186,7 +186,7 @@ jobs:
           json='${{ steps.get_artifact_links.outputs.artifact-data }}'
           output="discord-message="
           end_value=$(($(echo ${json} | jq '.artifacts | length') - 1))
-          output="${output}$(echo ${json} | jq '.artifacts | length') Artifacts\n"
+          output="${output}$(echo ${json} | jq '.artifacts | length') Artifacts${EOL}"
           for i in $(seq 0 $end_value)
           do
             output="${output}["
@@ -195,11 +195,9 @@ jobs:
             output="${output}$(echo ${json} | jq -r ".artifacts[${i}].workflow_run.id")"
             output="${output}/artifacts/"
             output="${output}$(echo ${json} | jq -r ".artifacts[${i}].id")"
-            output="${output}\)\n"
+            output="${output}\)${EOL}"
           done
-          echo "output<<EOF" >> $GITHUB_OUTPUT
-          echo "$output" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          echo $output >> $GITHUB_OUTPUT
       - run: echo ${{ steps.create_discord_message.outputs.discord-message }}
       - name: Gửi thông báo tới Discord webhook
         uses: sarisia/actions-status-discord@v1.14.0
