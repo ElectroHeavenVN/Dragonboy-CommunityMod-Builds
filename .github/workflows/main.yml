@@ -179,28 +179,32 @@ jobs:
         id: get_artifact_links
         run: |
           artifactsUrl=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/actions/runs?per_page=1 | jq '.workflow_runs[0].artifacts_url')
-          echo -n "artifact-data=" >> "GITHUB_OUTPUT"
-          echo -n $(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" $artifactsUrl) >> "GITHUB_OUTPUT"
+          echo -n "artifact-data=" >> "$GITHUB_OUTPUT"
+          echo -n $(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" $artifactsUrl) >> "$GITHUB_OUTPUT"
       - name: Tạo thông báo để gửi tới Discord webhook
         id: create_discord_message
         run: |
-          echo -n "discord-message=" >> "GITHUB_OUTPUT"
+          output="discord-message="
           for i in {1..$(echo ${{ steps.get_artifact_links.outputs.artifact-data }} | jq '.artifacts | length')} 
           do
-            echo -n [ >> "GITHUB_OUTPUT"
-            echo -n $(echo ${{ steps.get_artifact_links.outputs.artifact-data }} | jq '.artifacts[$i].name') >> "GITHUB_OUTPUT"
-            echo -n ]\(https://github.com/${{ github.repository }}/actions/runs/ >> "GITHUB_OUTPUT"
-            echo -n $(echo ${{ steps.get_artifact_links.outputs.artifact-data }} | jq '.artifacts[$i].workflow_run.id') >> "GITHUB_OUTPUT"
-            echo -n /artifacts/ >> "GITHUB_OUTPUT"
-            echo -n $(echo ${{ steps.get_artifact_links.outputs.artifact-data }} | jq '.artifacts[$i].id') >> "GITHUB_OUTPUT"
-            echo \) >> "GITHUB_OUTPUT"
+            output = "${output} ["
+            output = "${output}$(echo ${{ steps.get_artifact_links.outputs.artifact-data }} | jq '.artifacts[$i].name')"
+            output = "${output}]\(https://github.com/${{ github.repository }}/actions/runs/"
+            output = "${output}$(echo ${{ steps.get_artifact_links.outputs.artifact-data }} | jq '.artifacts[$i].workflow_run.id')"
+            output = "${output}/artifacts/"
+            output = "${output}$(echo ${{ steps.get_artifact_links.outputs.artifact-data }} | jq '.artifacts[$i].id')"
+            output = "${output}\)\n"
           done
-      - name: Gửi thông báo tới Discord webhook
-        uses: sarisia/actions-status-discord@v1.14.0
-        with:
-          webhook: ${{ secrets.DISCORD_WEBHOOK }}
-          nodetail: true
-          nofail: true
-          title: Dragonboy-CommunityMod-Builds
-          description: |
-            ${{ steps.create_discord_message.outputs.discord-message }}
+          echo "output<<EOF" >> $GITHUB_OUTPUT
+          echo "$output" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT 
+      - run: echo ${{ steps.create_discord_message.outputs.discord-message }}
+      # - name: Gửi thông báo tới Discord webhook
+      #   uses: sarisia/actions-status-discord@v1.14.0
+      #   with:
+      #     webhook: ${{ secrets.DISCORD_WEBHOOK }}
+      #     nodetail: true
+      #     nofail: true
+      #     title: Dragonboy-CommunityMod-Builds
+      #     description: |
+      #       ${{ steps.create_discord_message.outputs.discord-message }}
