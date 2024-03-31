@@ -197,7 +197,7 @@ jobs:
             output="${output}$(echo ${json} | jq -r ".artifacts[${i}].id")"
             output=$"${output}"')'$'\n'
           done
-          echo $output >> $GITHUB_OUTPUT
+          echo "$output" >> $GITHUB_OUTPUT
       - name: Gửi thông báo tới Discord webhook
         uses: sarisia/actions-status-discord@v1.14.0
         with:
