@@ -184,7 +184,7 @@ jobs:
         id: create_discord_message
         run: |
           json='${{ steps.get_artifact_links.outputs.artifact-data }}'
-          output="discord-message="
+          output="discord-message=## [${{ github.event.repository.name }}](https://github.com/${{ github.repository }})${EOL}"
           end_value=$(($(echo ${json} | jq '.artifacts | length') - 1))
           output="${output}$(echo ${json} | jq '.artifacts | length') Artifacts${EOL}"
           for i in $(seq 0 $end_value)
@@ -205,6 +205,6 @@ jobs:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
           nodetail: true
           nofail: true
-          title: Dragonboy-CommunityMod-Builds
+          title: Mod Cộng Đồng - Auto Build
           description: |
             ${{ steps.create_discord_message.outputs.discord-message }}
