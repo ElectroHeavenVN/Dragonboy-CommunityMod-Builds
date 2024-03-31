@@ -166,7 +166,7 @@ jobs:
   send-artifact-links-announcement:
     name: Gửi link artifact tới Discord webhook
     needs: [build-Unity-Windows, build-Unity-Linux, build-Account-Manager]
-    if: ${{ needs.build-Unity-Windows.result }} != 'cancelled' && ${{ needs.build-Unity-Linux.result }} != 'cancelled' && ${{ needs.build-Account-Manager.result }} != 'cancelled'
+    if: ${{ always() && (needs.build-Unity-Windows.result != 'cancelled' && needs.build-Unity-Linux.result != 'cancelled' && needs.build-Account-Manager.result != 'cancelled') }}
     runs-on: ubuntu-latest
     steps:
       - name: gọi API để lấy link artifact
