@@ -34,9 +34,9 @@ jobs:
           key: ${{ env.cache-key }}
       - name: kiểm tra hash
         id: check_hash
-        run: $hash = ${{ env.LATEST_COMMIT }}; if ((Test-Path latest-commit.txt -PathType Leaf)) { $commitContent = Get-Content -Path latest-commit.txt; $output = ($commitContent -eq $hash).ToString().ToLower(); } else { $output = "false" } $output = "cancel=$output".ToString().ToLower(); echo $output | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
+        run: $hash = "${{ env.LATEST_COMMIT }}"; if ((Test-Path latest-commit.txt -PathType Leaf)) { $commitContent = Get-Content -Path latest-commit.txt; $output = ($commitContent -eq $hash).ToString().ToLower(); } else { $output = "false" } $output = "cancel=$output".ToString().ToLower(); echo $output | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
       - name: Lấy hash commit mới nhất
-        run: echo ${{ env.LATEST_COMMIT }} > latest-commit.txt
+        run: echo "${{ env.LATEST_COMMIT }}" > latest-commit.txt
       - name: Xóa cache trước đó
         if: ${{ steps.cache-restore.outputs.cache-hit }}
         continue-on-error: true
@@ -246,20 +246,20 @@ jobs:
       - name: Lấy màu cho thông báo
         run: |
           {
-            echo "color="
             buildAccountManager="${{ needs.build-Account-Manager.result }}"
             buildUnityLinux="${{ needs.build-Unity-Linux.result }}"
             buildUnityWindows="${{ needs.build-Unity-Windows.result }}"
             failure_count=0
             if [ "$buildAccountManager" == "failure" ]; then
-                ((failure_count++))
+            ((failure_count++))
             fi
             if [ "$buildUnityLinux" == "failure" ]; then
-                ((failure_count++))
+            ((failure_count++))
             fi
             if [ "$buildUnityWindows" == "failure" ]; then
-                ((failure_count++))
+            ((failure_count++))
             fi
+            echo -n "color="
             if [ "$failure_count" -eq 3 ]; then
                 echo "0xff0000"
             elif [ "$failure_count" -eq 2 ]; then
