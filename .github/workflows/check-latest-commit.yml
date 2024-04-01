@@ -6,6 +6,8 @@ jobs:
     runs-on: windows-latest
     strategy:
       fail-fast: false
+    env:
+      cache-key: latest-commit
     steps:
       - name: Clone pk9r327/Dragonboy branch Unity-project
         uses: actions/checkout@v4.1.1
@@ -13,17 +15,25 @@ jobs:
           repository: pk9r327/Dragonboy
           ref: Unity-project
       - name: Cache
-        uses: actions/cache@v4.0.2
+        id: cache-restore
+        uses: actions/cache/restore@v4.0.2
         with:
           path: latest-commit.txt
-          key: latest-commit-${{ hashFiles('latest-commit.txt') }}
-          restore-keys: latest-commit-
+          key: ${{ env.cache-key }}
       - run: git rev-parse HEAD
       - run: cat latest-commit.txt
       - run: git rev-parse HEAD > latest-commit.txt
       - run: cat latest-commit.txt
+      - name: Delete Previous Cache
+        if: ${{ steps.cache-restore.outputs.cache-hit }}
+        continue-on-error: true
+        run: |
+          gh extension install actions/gh-actions-cache
+          gh actions-cache delete "${{ env.cache-key }}" --confirm
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Lưu cache
         uses: actions/cache/save@v4.0.2
         with: 
           path: latest-commit.txt
-          key: latest-commit-${{ hashFiles('latest-commit.txt') }}
+          key: ${{ env.cache-key }}
