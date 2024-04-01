@@ -19,8 +19,8 @@ jobs:
           key: latest-commit-${{ hashFiles('latest-commit.txt') }}
           restore-keys: latest-commit-
       - run: git rev-parse HEAD
-      - run: cat latest-commit.txt
-      - run: git rev-parse HEAD >> latest-commit.txt
+      # - run: cat latest-commit.txt
+      - run: git rev-parse HEAD > latest-commit.txt
       - run: cat latest-commit.txt
       - name: Lưu cache
         uses: actions/cache/save@v4.0.2
