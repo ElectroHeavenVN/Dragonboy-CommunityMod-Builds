@@ -8,6 +8,8 @@ jobs:
       fail-fast: false
     env:
       cache-key: latest-commit
+    permissions: 
+      actions: write
     steps:
       - name: Clone pk9r327/Dragonboy branch Unity-project
         uses: actions/checkout@v4.1.1
