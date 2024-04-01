@@ -25,9 +25,9 @@ jobs:
           path: latest-commit.txt
           key: ${{ env.cache-key }}
       # - run: cat latest-commit.txt
-      - run: echo 'test123456' > latest-commit.txt
+      # - run: echo 'test123456' > latest-commit.txt
       - run: echo ${{ env.LATEST_COMMIT }}
-      # - run: echo ${{ env.LATEST_COMMIT }} > latest-commit.txt
+      - run: echo ${{ env.LATEST_COMMIT }} > latest-commit.txt
       - run: cat latest-commit.txt
       - name: Delete Previous Cache
         if: ${{ steps.cache-restore.outputs.cache-hit }}
