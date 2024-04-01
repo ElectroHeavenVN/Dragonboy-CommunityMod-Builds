@@ -21,3 +21,4 @@ jobs:
       - run: git rev-parse HEAD
       - run: cat latest-commit.txt
       - run: git rev-parse HEAD > latest-commit.txt
+      - run: cat latest-commit.txt
