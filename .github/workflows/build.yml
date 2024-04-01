@@ -226,8 +226,8 @@ jobs:
             json='${{ steps.get_artifact_links.outputs.artifact-data }}'
             output="Kết quả:"$'\n'
             output="${output}- Biên dịch QLTK: **${{ needs.build-Account-Manager.result }}**"$'\n'
-            output="${output}- Biên dịch game trên Windows: **${{ needs.build-Unity-Windows.result }}**"$'\n'
-            output="${output}- Biên dịch game trên Linux: **${{ needs.build-Unity-Linux.result }}**"$'\n'
+            output="${output}- Biên dịch game trên máy chủ Windows: **${{ needs.build-Unity-Windows.result }}**"$'\n'
+            output="${output}- Biên dịch game trên máy chủ Linux: **${{ needs.build-Unity-Linux.result }}**"$'\n'
             output="${output}$(echo ${json} | jq '.artifacts | length') Artifact:"$'\n'
             end_value=$(($(echo ${json} | jq '.artifacts | length') - 1))
             for i in $(seq 0 $end_value)
