@@ -1,0 +1,22 @@
+name: Kiểm tra commit mới nhất
+on: workflow_dispatch
+jobs:
+  check-commit:
+    name: Kiểm tra commit mới
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+    steps:
+      - name: Clone pk9r327/Dragonboy branch Unity-project
+        uses: actions/checkout@v4.1.1
+        with:
+          repository: pk9r327/Dragonboy
+          ref: Unity-project
+      - name: Cache commit mới nhất
+        uses: actions/cache@v4.0.2
+        with:
+          path: latest-commit.txt
+          key: latest-commit
+          restore-keys: latest-commit
+      - run: $hash = git rev-parse HEAD; if ((Test-Path latest-commit.txt -PathType Leaf)) { $commitContent = Get-Content -Path latest-commit.txt; $output = ($commitContent -eq $hash).ToString().ToLower(); } else { $output = "false" } $output = "cancel=$output".ToString().ToLower(); echo $output
+      - run: cat latest-commit.txt
