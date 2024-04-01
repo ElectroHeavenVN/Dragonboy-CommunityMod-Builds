@@ -14,30 +14,40 @@ jobs:
       cancel: ${{ steps.check_hash.outputs.cancel }}
     strategy:
       fail-fast: false
+    env:
+      cache-key: latest-commit
+    permissions:
+      actions: write
     steps:
-      - name: Clone pk9r327/Dragonboy branch Unity-project
+      - name: Checkout
         uses: actions/checkout@v4.1.1
-        with:
-          repository: pk9r327/Dragonboy
-          ref: Unity-project
-      - name: Cache commit mới nhất
-        uses: actions/cache@v4.0.2
+      - name: Lấy hash commit mới nhất của branch Unity-project
+        run: |
+          $commit = git ls-remote https://github.com/pk9r327/Dragonboy.git Unity-project
+          $hash = $commit.Split("`t")[0]
+          echo "LATEST_COMMIT=$hash" | Out-File -FilePath $env:GITHUB_ENV -Append
+      - name: Cache hash commit
+        id: cache-restore
+        uses: actions/cache/restore@v4.0.2
         with:
           path: latest-commit.txt
-          key: latest-commit-${{ hashFiles('latest-commit.txt') }}
-          restore-keys: latest-commit-
-      - run: cat latest-commit.txt
+          key: ${{ env.cache-key }}
       - name: kiểm tra hash
         id: check_hash
-        run: $hash = git rev-parse HEAD; if ((Test-Path latest-commit.txt -PathType Leaf)) { $commitContent = Get-Content -Path latest-commit.txt; $output = ($commitContent -eq $hash).ToString().ToLower(); } else { $output = "false" } $output = "cancel=$output".ToString().ToLower(); echo $output | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
+        run: $hash = ${{ env.LATEST_COMMIT }}; if ((Test-Path latest-commit.txt -PathType Leaf)) { $commitContent = Get-Content -Path latest-commit.txt; $output = ($commitContent -eq $hash).ToString().ToLower(); } else { $output = "false" } $output = "cancel=$output".ToString().ToLower(); echo $output | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
       - name: Lấy hash commit mới nhất
-        run: git rev-parse HEAD > latest-commit.txt
-      - run: cat latest-commit.txt
-      - name: Lưu cache
+        run: echo ${{ env.LATEST_COMMIT }} > latest-commit.txt
+      - name: Xóa cache trước đó
+        if: ${{ steps.cache-restore.outputs.cache-hit }}
+        continue-on-error: true
+        run: gh cache delete "${{ env.cache-key }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Lưu cache mới
         uses: actions/cache/save@v4.0.2
         with: 
           path: latest-commit.txt
-          key: latest-commit-${{ hashFiles('latest-commit.txt') }}
+          key: ${{ env.cache-key }}
   build-Account-Manager:
     name: Biên dịch QLTK (Windows, .NET 8.0)
     needs: [check-commit]
@@ -85,6 +95,8 @@ jobs:
         scriptingBackend:
           - Mono # 0
           - IL2CPP # 1
+    permissions:
+      actions: write
     steps:
       - name: Clone pk9r327/Dragonboy branch Unity-project
         uses: actions/checkout@v4.1.1
@@ -92,11 +104,11 @@ jobs:
           repository: pk9r327/Dragonboy
           ref: Unity-project
       - name: Cache
+        id: cache-restore
         uses: actions/cache@v4.0.2
         with:
           path: GameProject/DragonBoy/Library
-          key: Library-${{matrix.targetPlatform}}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
-          restore-keys: Library-${{matrix.targetPlatform}}-
+          key: Library-${{matrix.targetPlatform}}
       - name: Đổi scripting backend thành ${{matrix.scriptingBackend}}
         run: cd GameProject && pwsh ./set_scripting_backend.ps1 -projectSettingsPath "DragonBoy/ProjectSettings/ProjectSettings.asset" -platform ${{ matrix.targetPlatform }} -scriptingBackend ${{matrix.scriptingBackend}} || powershell ./set_scripting_backend.ps1 -projectSettingsPath "DragonBoy/ProjectSettings/ProjectSettings.asset" -platform ${{ matrix.targetPlatform }} -scriptingBackend ${{matrix.scriptingBackend}};     
       - name: Biên dịch dự án
@@ -115,11 +127,18 @@ jobs:
         with:
           name: Build-${{ matrix.targetPlatform }}-${{matrix.scriptingBackend}}
           path: build/${{ matrix.targetPlatform }}
+      - name: Xóa cache trước đó
+        if: ${{ steps.cache-restore.outputs.cache-hit }}
+        continue-on-error: true
+        run: |
+          gh cache delete "Library-${{matrix.targetPlatform}}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Lưu cache
         uses: actions/cache/save@v4.0.2
         with: 
           path: GameProject/DragonBoy/Library
-          key: Library-${{matrix.targetPlatform}}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          key: Library-${{matrix.targetPlatform}}
   build-Unity-Linux:
     name: Biên dịch ${{ matrix.targetPlatform }} ${{matrix.scriptingBackend}} trên máy chủ Linux
     needs: [check-commit]
@@ -134,6 +153,8 @@ jobs:
         scriptingBackend:
           - Mono # 0
           - IL2CPP # 1 
+    permissions:
+      actions: write
     steps: 
       - name: Clone pk9r327/Dragonboy branch Unity-project
         uses: actions/checkout@v4.1.1
@@ -142,10 +163,10 @@ jobs:
           ref: Unity-project
       - name: Cache
         uses: actions/cache@v4.0.2
+        id: cache-restore
         with:
           path: GameProject/DragonBoy/Library
-          key: Library-${{matrix.targetPlatform}}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
-          restore-keys: Library-${{matrix.targetPlatform}}-
+          key: Library-${{matrix.targetPlatform}}
       - name: Đổi scripting backend thành ${{matrix.scriptingBackend}}
         run: cd GameProject && chmod +x set_scripting_backend.sh && ./set_scripting_backend.sh "DragonBoy/ProjectSettings/ProjectSettings.asset" "${{ matrix.targetPlatform }}" "${{matrix.scriptingBackend}}"
       - if: ${{ matrix.targetPlatform == 'Android' }} 
@@ -173,11 +194,18 @@ jobs:
         with:
           name: Build-${{ matrix.targetPlatform }}-${{matrix.scriptingBackend}}
           path: build/${{ matrix.targetPlatform }}
+      - name: Xóa cache trước đó
+        if: ${{ steps.cache-restore.outputs.cache-hit }}
+        continue-on-error: true
+        run: |
+          gh cache delete "Library-${{matrix.targetPlatform}}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Lưu cache
         uses: actions/cache/save@v4.0.2
         with: 
           path: GameProject/DragonBoy/Library
-          key: Library-${{matrix.targetPlatform}}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          key: Library-${{matrix.targetPlatform}}
   send-artifact-links-announcement:
     name: Gửi link artifact tới Discord webhook
     needs: [build-Unity-Windows, build-Unity-Linux, build-Account-Manager]
