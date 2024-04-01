@@ -82,7 +82,7 @@ jobs:
         name: QLTK_${{ matrix.configuration }}
         path: QLTK/bin/${{ matrix.configuration }}
   build-Unity-Windows:
-    name: Biên dịch ${{ matrix.targetPlatform }} ${{matrix.scriptingBackend}} trên máy chủ Windows
+    name: Biên dịch ${{ matrix.targetPlatform }} ${{ matrix.scriptingBackend }} trên máy chủ Windows
     needs: [check-commit]
     if: needs.check-commit.outputs.cancel == 'false'
     runs-on: windows-latest
@@ -108,9 +108,9 @@ jobs:
         uses: actions/cache@v4.0.2
         with:
           path: GameProject/DragonBoy/Library
-          key: Library-${{matrix.targetPlatform}}
-      - name: Đổi scripting backend thành ${{matrix.scriptingBackend}}
-        run: cd GameProject && pwsh ./set_scripting_backend.ps1 -projectSettingsPath "DragonBoy/ProjectSettings/ProjectSettings.asset" -platform ${{ matrix.targetPlatform }} -scriptingBackend ${{matrix.scriptingBackend}} || powershell ./set_scripting_backend.ps1 -projectSettingsPath "DragonBoy/ProjectSettings/ProjectSettings.asset" -platform ${{ matrix.targetPlatform }} -scriptingBackend ${{matrix.scriptingBackend}};     
+          key: Library-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
+      - name: Đổi scripting backend thành ${{ matrix.scriptingBackend }}
+        run: cd GameProject && pwsh ./set_scripting_backend.ps1 -projectSettingsPath "DragonBoy/ProjectSettings/ProjectSettings.asset" -platform ${{ matrix.targetPlatform }} -scriptingBackend ${{ matrix.scriptingBackend }} || powershell ./set_scripting_backend.ps1 -projectSettingsPath "DragonBoy/ProjectSettings/ProjectSettings.asset" -platform ${{ matrix.targetPlatform }} -scriptingBackend ${{ matrix.scriptingBackend }};     
       - name: Biên dịch dự án
         uses: game-ci/unity-builder@v4.2.3
         env:
@@ -125,22 +125,22 @@ jobs:
       - name: Upload file game đã biên dịch
         uses: actions/upload-artifact@v4.3.1
         with:
-          name: Build-${{ matrix.targetPlatform }}-${{matrix.scriptingBackend}}
+          name: Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
           path: build/${{ matrix.targetPlatform }}
       - name: Xóa cache trước đó
         if: ${{ steps.cache-restore.outputs.cache-hit }}
         continue-on-error: true
         run: |
-          gh cache delete "Library-${{matrix.targetPlatform}}"
+          gh cache delete "Library-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Lưu cache
         uses: actions/cache/save@v4.0.2
         with: 
           path: GameProject/DragonBoy/Library
-          key: Library-${{matrix.targetPlatform}}
+          key: Library-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
   build-Unity-Linux:
-    name: Biên dịch ${{ matrix.targetPlatform }} ${{matrix.scriptingBackend}} trên máy chủ Linux
+    name: Biên dịch ${{ matrix.targetPlatform }} ${{ matrix.scriptingBackend }} trên máy chủ Linux
     needs: [check-commit]
     if: needs.check-commit.outputs.cancel == 'false'
     runs-on: ubuntu-latest
@@ -166,9 +166,9 @@ jobs:
         id: cache-restore
         with:
           path: GameProject/DragonBoy/Library
-          key: Library-${{matrix.targetPlatform}}
-      - name: Đổi scripting backend thành ${{matrix.scriptingBackend}}
-        run: cd GameProject && chmod +x set_scripting_backend.sh && ./set_scripting_backend.sh "DragonBoy/ProjectSettings/ProjectSettings.asset" "${{ matrix.targetPlatform }}" "${{matrix.scriptingBackend}}"
+          key: Library-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
+      - name: Đổi scripting backend thành ${{ matrix.scriptingBackend }}
+        run: cd GameProject && chmod +x set_scripting_backend.sh && ./set_scripting_backend.sh "DragonBoy/ProjectSettings/ProjectSettings.asset" "${{ matrix.targetPlatform }}" "${{ matrix.scriptingBackend }}"
       - if: ${{ matrix.targetPlatform == 'Android' }} 
         name: Giải phóng bộ nhớ (Android build)
         uses: jlumbroso/free-disk-space@v1.3.1
@@ -192,20 +192,20 @@ jobs:
       - name: Upload file game đã biên dịch
         uses: actions/upload-artifact@v4.3.1
         with:
-          name: Build-${{ matrix.targetPlatform }}-${{matrix.scriptingBackend}}
+          name: Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend}}
           path: build/${{ matrix.targetPlatform }}
       - name: Xóa cache trước đó
         if: ${{ steps.cache-restore.outputs.cache-hit }}
         continue-on-error: true
         run: |
-          gh cache delete "Library-${{matrix.targetPlatform}}"
+          gh cache delete "Library-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Lưu cache
         uses: actions/cache/save@v4.0.2
         with: 
           path: GameProject/DragonBoy/Library
-          key: Library-${{matrix.targetPlatform}}
+          key: Library-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
   send-artifact-links-announcement:
     name: Gửi link artifact tới Discord webhook
     needs: [build-Unity-Windows, build-Unity-Linux, build-Account-Manager]
