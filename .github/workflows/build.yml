@@ -24,13 +24,18 @@ jobs:
         uses: actions/cache@v4.0.2
         with:
           path: latest-commit.txt
-          key: latest-commit
-          restore-keys: latest-commit
+          key: latest-commit-${{ hashFiles('latest-commit.txt') }}
+          restore-keys: latest-commit-
       - name: kiểm tra hash
         id: check_hash
         run: $hash = git rev-parse HEAD; if ((Test-Path latest-commit.txt -PathType Leaf)) { $commitContent = Get-Content -Path latest-commit.txt; $output = ($commitContent -eq $hash).ToString().ToLower(); } else { $output = "false" } $output = "cancel=$output".ToString().ToLower(); echo $output | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
       - name: Lấy hash commit mới nhất
         run: git rev-parse HEAD > latest-commit.txt
+      - name: Lưu cache
+        uses: actions/cache/save@v4.0.2
+        with: 
+          path: latest-commit.txt
+          key: latest-commit-${{ hashFiles('latest-commit.txt') }}
   build-Account-Manager:
     name: Biên dịch QLTK (Windows, .NET 8.0)
     needs: [check-commit]
@@ -51,12 +56,10 @@ jobs:
       uses: microsoft/setup-msbuild@v2
     - name: Setup NuGet
       uses: nuget/setup-nuget@v2
-    - name: Restore project
-      run: msbuild ${{ env.Solution-Path }} /t:Restore /p:Configuration=$env:Configuration
+    - name: Khôi phục dự án
+      run: msbuild ${{ env.Solution-Path }} /t:Restore /p:Configuration=$env:Configuration && nuget restore ${{ env.Solution-Path }}
       env:
         Configuration: ${{ matrix.configuration }}
-    - name: Restore NuGet Packages
-      run: nuget restore ${{ env.Solution-Path }}
     - name: Biên dịch dự án
       run: msbuild ${{ env.Solution-Path }} -t:rebuild -property:Configuration=$env:Configuration
       env:
@@ -90,8 +93,8 @@ jobs:
         uses: actions/cache@v4.0.2
         with:
           path: GameProject/DragonBoy/Library
-          key: Library-${{matrix.targetPlatform}}
-          restore-keys: Library-
+          key: Library-${{matrix.targetPlatform}}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: Library-${{matrix.targetPlatform}}-
       - name: Đổi scripting backend thành ${{matrix.scriptingBackend}}
         run: cd GameProject && pwsh ./set_scripting_backend.ps1 -projectSettingsPath "DragonBoy/ProjectSettings/ProjectSettings.asset" -platform ${{ matrix.targetPlatform }} -scriptingBackend ${{matrix.scriptingBackend}} || powershell ./set_scripting_backend.ps1 -projectSettingsPath "DragonBoy/ProjectSettings/ProjectSettings.asset" -platform ${{ matrix.targetPlatform }} -scriptingBackend ${{matrix.scriptingBackend}};     
       - name: Biên dịch dự án
@@ -110,6 +113,11 @@ jobs:
         with:
           name: Build-${{ matrix.targetPlatform }}-${{matrix.scriptingBackend}}
           path: build/${{ matrix.targetPlatform }}
+      - name: Lưu cache
+        uses: actions/cache/save@v4.0.2
+        with: 
+          path: GameProject/DragonBoy/Library
+          key: Library-${{matrix.targetPlatform}}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
   build-Unity-Linux:
     name: Biên dịch ${{ matrix.targetPlatform }} ${{matrix.scriptingBackend}} trên máy chủ Linux
     needs: [check-commit]
@@ -134,8 +142,8 @@ jobs:
         uses: actions/cache@v4.0.2
         with:
           path: GameProject/DragonBoy/Library
-          key: Library-${{ matrix.targetPlatform }}
-          restore-keys: Library-
+          key: Library-${{matrix.targetPlatform}}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: Library-${{matrix.targetPlatform}}-
       - name: Đổi scripting backend thành ${{matrix.scriptingBackend}}
         run: cd GameProject && chmod +x set_scripting_backend.sh && ./set_scripting_backend.sh "DragonBoy/ProjectSettings/ProjectSettings.asset" "${{ matrix.targetPlatform }}" "${{matrix.scriptingBackend}}"
       - if: ${{ matrix.targetPlatform == 'Android' }} 
@@ -163,6 +171,11 @@ jobs:
         with:
           name: Build-${{ matrix.targetPlatform }}-${{matrix.scriptingBackend}}
           path: build/${{ matrix.targetPlatform }}
+      - name: Lưu cache
+        uses: actions/cache/save@v4.0.2
+        with: 
+          path: GameProject/DragonBoy/Library
+          key: Library-${{matrix.targetPlatform}}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
   send-artifact-links-announcement:
     name: Gửi link artifact tới Discord webhook
     needs: [build-Unity-Windows, build-Unity-Linux, build-Account-Manager]
