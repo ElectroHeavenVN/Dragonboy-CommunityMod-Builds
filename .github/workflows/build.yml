@@ -181,16 +181,15 @@ jobs:
           {
             echo 'OUTPUT<<EOF'
             json='${{ steps.get_artifact_links.outputs.artifact-data }}'
-            output="### [${{ github.event.repository.name }}](https://github.com/${{ github.repository }})"$'\n'
-            end_value=$(($(echo ${json} | jq '.artifacts | length') - 1))
-            output="${output}Kết quả:"$'\n'
+            output="Kết quả:"$'\n'
             output="${output}- Biên dịch QLTK: **${{ needs.build-Account-Manager.result }}**"$'\n'
             output="${output}- Biên dịch game trên Windows: **${{ needs.build-Unity-Windows.result }}**"$'\n'
             output="${output}- Biên dịch game trên Linux: **${{ needs.build-Unity-Linux.result }}**"$'\n'
             output="${output}$(echo ${json} | jq '.artifacts | length') Artifact:"$'\n'
+            end_value=$(($(echo ${json} | jq '.artifacts | length') - 1))
             for i in $(seq 0 $end_value)
             do
-              output="${output}["
+              output="${output}- ["
               output="${output}$(echo ${json} | jq -r ".artifacts[${i}].name")"
               output="${output}](https://github.com/${{ github.repository }}/actions/runs/"
               output="${output}$(echo ${json} | jq -r ".artifacts[${i}].workflow_run.id")"
@@ -201,13 +200,41 @@ jobs:
             echo "$output" 
             echo EOF
           } >> "$GITHUB_ENV"
+      - name: Lấy màu cho thông báo
+        run: |
+          {
+            echo "color="
+            buildAccountManager="${{ needs.build-Account-Manager.result }}"
+            buildUnityLinux="${{ needs.build-Unity-Linux.result }}"
+            buildUnityWindows="${{ needs.build-Unity-Windows.result }}"
+            failure_count=0
+            if [ "$buildAccountManager" == "failure" ]; then
+                ((failure_count++))
+            fi
+            if [ "$buildUnityLinux" == "failure" ]; then
+                ((failure_count++))
+            fi
+            if [ "$buildUnityWindows" == "failure" ]; then
+                ((failure_count++))
+            fi
+            if [ "$failure_count" -eq 3 ]; then
+                echo "0xff0000"
+            elif [ "$failure_count" -eq 2 ]; then
+                echo "0xffa500"
+            elif [ "$failure_count" -eq 1 ]; then
+                echo "0xffff00"
+            else
+                echo "0x00ff00"
+            fi
+          } >> "$GITHUB_ENV"
       - name: Gửi thông báo tới Discord webhook
         uses: sarisia/actions-status-discord@v1.14.0
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
           nodetail: true
           nofail: true
-          title: Mod Cộng Đồng - Auto Build
+          title: ${{ github.event.repository.name }}
           url: ${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}
+          color: ${{ env.color }}
           description: |
             ${{ env.OUTPUT }}
