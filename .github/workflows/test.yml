@@ -3,7 +3,7 @@ on: workflow_dispatch
 jobs:
   Test:
     name: Test
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
     steps:
