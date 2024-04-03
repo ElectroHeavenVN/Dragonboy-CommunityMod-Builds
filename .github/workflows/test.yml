@@ -30,8 +30,7 @@ jobs:
           for ($i = 0; $i -le $json.Count - 1; $i++) {
               $output += "$i. [$($json[$i].name)](https://github.com/${{ github.repository }}/actions/runs/$($json[$i].workflow_run.id)/artifacts/$($json[$i].id))`n"
           }
-          Write-Host "OUTPUT<<EOF`n${output}EOF"
-          >> "$GITHUB_ENV"
+          Write-Host "OUTPUT<<EOF`n${output}EOF" | Out-File -FilePath $env:GITHUB_ENV -Append
       - name: Gửi thông báo tới Discord webhook
         uses: sarisia/actions-status-discord@v1.14.0
         with:
