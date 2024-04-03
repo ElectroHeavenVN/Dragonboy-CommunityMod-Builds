@@ -6,38 +6,36 @@ jobs:
     runs-on: windows-latest
     strategy:
       fail-fast: false
-    env:
-      cache-key: latest-commit
-    permissions: 
-      actions: write
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4.1.1
-      - name: Get latest commit hash
-        run: |
-          $commit = git ls-remote https://github.com/pk9r327/Dragonboy.git Unity-project
-          $hash = $commit.Split("`t")[0]
-          echo "LATEST_COMMIT=$hash" | Out-File -FilePath $env:GITHUB_ENV -Append
-      - name: Cache
-        id: cache-restore
-        uses: actions/cache/restore@v4.0.2
-        with:
-          path: latest-commit.txt
-          key: ${{ env.cache-key }}
-      # - run: cat latest-commit.txt
-      # - run: echo 'test123456' > latest-commit.txt
-      - run: echo ${{ env.LATEST_COMMIT }}
-      - run: echo ${{ env.LATEST_COMMIT }} > latest-commit.txt
-      - run: cat latest-commit.txt
-      - name: Delete Previous Cache
-        if: ${{ steps.cache-restore.outputs.cache-hit }}
-        continue-on-error: true
-        run: |
-          gh cache delete "${{ env.cache-key }}"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Lưu cache
-        uses: actions/cache/save@v4.0.2
-        with: 
-          path: latest-commit.txt
-          key: ${{ env.cache-key }}
+      - run: |
+          {
+            buildAccountManager="success"
+            buildUnityLinux="success"
+            buildUnityWindows="success"
+            buildUnityAndroid="failure"
+            failure_count=0
+            if [ "$buildAccountManager" == "failure" ]; then
+            ((failure_count++))
+            fi
+            if [ "$buildUnityLinux" == "failure" ]; then
+            ((failure_count++))
+            fi
+            if [ "$buildUnityWindows" == "failure" ]; then
+            ((failure_count++))
+            fi
+            if [ "$buildUnityAndroid" == "failure" ]; then
+            ((failure_count++))
+            fi
+            echo -n "color="
+            if [ "$failure_count" -eq 4 ]; then
+                echo "0xff0000"
+            elif [ "$failure_count" -eq 3 ]; then
+            echo "0xff5a00"
+            elif [ "$failure_count" -eq 2 ]; then
+                echo "0xffa500"
+            elif [ "$failure_count" -eq 1 ]; then
+                echo "0xffff00"
+            else
+                echo "0x00ff00"
+            fi
+          } >> "$GITHUB_ENV"
