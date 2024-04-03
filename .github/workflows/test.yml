@@ -20,10 +20,10 @@ jobs:
           if ($buildAccountManager -eq "failure") {$failure_count++} if ($buildUnityLinux -eq "failure") {$failure_count++} if ($buildUnityWindows -eq "failure") {$failure_count++} if ($buildUnityAndroid -eq "failure") {$failure_count++}
           if ($failure_count -eq 4) {$color = 0xff0000} elseif ($failure_count -eq 3) {$color = 0xff5a00} elseif ($failure_count -eq 2)  {$color = 0xffa500} elseif ($failure_count -eq 1) {$color = 0xffff00} else {$color = 0x00ff00}
           
-          $output = "Kết quả:`r`n
-          - Biên dịch QLTK: **${buildAccountManager}**`r`n
-          - Biên dịch game cho Windows: **${buildUnityWindows}**`r`n
-          - Biên dịch game cho Linux: **${buildUnityLinux}**`r`n
+          $output = "Kết quả:
+          - Biên dịch QLTK: **${buildAccountManager}**
+          - Biên dịch game cho Windows: **${buildUnityWindows}**
+          - Biên dịch game cho Linux: **${buildUnityLinux}**
           - Biên dịch Game cho Android: **${buildUnityAndroid}**"
           if ($json.Count -gt 1) {$output += "`r`n$($json.Count) Artifact:"}
           for ($i = 0; $i -le $json.Count - 1; $i++) {
