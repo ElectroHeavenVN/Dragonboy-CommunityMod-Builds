@@ -33,7 +33,7 @@ jobs:
               username = "GitHub Actions Webhook"
                 embeds = @(
                     @{
-                        title = ${{ github.event.repository.name }}
+                        title = "${{ github.event.repository.name }}" + " - " + "${{ github.workflow.result }}"
                         description = $output
                         color = $color
                     }
