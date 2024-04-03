@@ -1,6 +1,5 @@
 name: Biên dịch dự án (QLTK, Game)
 
-# on: [push, pull_request]
 on:
   schedule:
     - cron: "0 0 * * *"
@@ -49,7 +48,7 @@ jobs:
           path: latest-commit.txt
           key: ${{ env.cache-key }}
   build-Account-Manager:
-    name: Biên dịch QLTK (Windows, .NET 8.0)
+    name: Biên dịch QLTK (Windows, ${{ matrix.configuration }}, .NET 8.0)
     needs: [check-commit]
     if: needs.check-commit.outputs.cancel == 'false'
     strategy:
@@ -79,7 +78,7 @@ jobs:
     - name: Upload file đã biên dịch
       uses: actions/upload-artifact@v4.3.1
       with:
-        name: QLTK_${{ matrix.configuration }}
+        name: QLTK-${{ matrix.configuration }}
         path: QLTK/bin/${{ matrix.configuration }}
   build-Unity-Windows:
     name: Biên dịch ${{ matrix.targetPlatform }} ${{ matrix.scriptingBackend }} trên máy chủ Windows
@@ -108,7 +107,7 @@ jobs:
         uses: actions/cache@v4.0.2
         with:
           path: GameProject/DragonBoy/Library
-          key: Library-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
+          key: Library-${{ matrix.targetPlatform }}
       - name: Đổi scripting backend thành ${{ matrix.scriptingBackend }}
         run: cd GameProject && pwsh ./set_scripting_backend.ps1 -projectSettingsPath "DragonBoy/ProjectSettings/ProjectSettings.asset" -platform ${{ matrix.targetPlatform }} -scriptingBackend ${{ matrix.scriptingBackend }} || powershell ./set_scripting_backend.ps1 -projectSettingsPath "DragonBoy/ProjectSettings/ProjectSettings.asset" -platform ${{ matrix.targetPlatform }} -scriptingBackend ${{ matrix.scriptingBackend }};     
       - name: Biên dịch dự án
@@ -131,16 +130,16 @@ jobs:
         if: ${{ steps.cache-restore.outputs.cache-hit }}
         continue-on-error: true
         run: |
-          gh cache delete "Library-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}"
+          gh cache delete "Library-${{ matrix.targetPlatform }}"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Lưu cache
         uses: actions/cache/save@v4.0.2
         with: 
           path: GameProject/DragonBoy/Library
-          key: Library-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
+          key: Library-${{ matrix.targetPlatform }}
   build-Unity-Linux:
-    name: Biên dịch ${{ matrix.targetPlatform }} ${{ matrix.scriptingBackend }} trên máy chủ Linux
+    name: Biên dịch StandaloneLinux64 trên máy chủ Linux
     needs: [check-commit]
     if: needs.check-commit.outputs.cancel == 'false'
     runs-on: ubuntu-latest
@@ -149,6 +148,71 @@ jobs:
       matrix:
         targetPlatform:
           - StandaloneLinux64
+        scriptingBackend:
+          - Mono # 0
+          - IL2CPP # 1 
+    permissions:
+      actions: write
+    steps: 
+      - name: Clone pk9r327/Dragonboy branch Unity-project
+        uses: actions/checkout@v4.1.1
+        with:
+          repository: pk9r327/Dragonboy
+          ref: Unity-project
+      - name: Cache
+        uses: actions/cache@v4.0.2
+        id: cache-restore
+        with:
+          path: GameProject/DragonBoy/Library
+          key: Library-${{ matrix.targetPlatform }}
+      - name: Đổi scripting backend thành ${{ matrix.scriptingBackend }}
+        run: cd GameProject && chmod +x set_scripting_backend.sh && ./set_scripting_backend.sh "DragonBoy/ProjectSettings/ProjectSettings.asset" "${{ matrix.targetPlatform }}" "${{ matrix.scriptingBackend }}"
+      - if: ${{ matrix.targetPlatform == 'Android' }} 
+        name: Giải phóng bộ nhớ (Android build)
+        uses: jlumbroso/free-disk-space@v1.3.1
+      - name: Biên dịch dự án
+        uses: game-ci/unity-builder@v4.2.3
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: ${{ matrix.targetPlatform }}
+          androidKeystoreName: DragonBoy-pk9r327-UnityProject.keystore # This file won't exist, but this property needs to exist.
+          androidKeystoreBase64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          androidKeystorePass: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+          androidKeyaliasName: ${{ secrets.ANDROID_KEYALIAS_NAME }}
+          androidKeyaliasPass: ${{ secrets.ANDROID_KEYALIAS_PASS }}
+          androidTargetSdkVersion: AndroidApiLevel33
+          projectPath: GameProject/DragonBoy
+          buildName: DragonBoy
+          allowDirtyBuild: true
+      - name: Upload file game đã biên dịch
+        uses: actions/upload-artifact@v4.3.1
+        with:
+          name: Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend}}
+          path: build/${{ matrix.targetPlatform }}
+      - name: Xóa cache trước đó
+        if: ${{ steps.cache-restore.outputs.cache-hit }}
+        continue-on-error: true
+        run: |
+          gh cache delete "Library-${{ matrix.targetPlatform }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Lưu cache
+        uses: actions/cache/save@v4.0.2
+        with: 
+          path: GameProject/DragonBoy/Library
+          key: Library-${{ matrix.targetPlatform }}
+  build-Unity-Android:
+    name: Biên dịch Android trên máy chủ Linux
+    needs: [check-commit]
+    if: needs.check-commit.outputs.cancel == 'false'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        targetPlatform:
           - Android
         scriptingBackend:
           - Mono # 0
@@ -205,11 +269,11 @@ jobs:
         uses: actions/cache/save@v4.0.2
         with: 
           path: GameProject/DragonBoy/Library
-          key: Library-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
+          key: Library-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}    
   send-artifact-links-announcement:
     name: Gửi link artifact tới Discord webhook
-    needs: [build-Unity-Windows, build-Unity-Linux, build-Account-Manager]
-    if: ${{ always() && (needs.build-Unity-Windows.result != 'cancelled' && needs.build-Unity-Linux.result != 'cancelled' && needs.build-Account-Manager.result != 'cancelled') && (needs.build-Unity-Windows.result != 'skipped' && needs.build-Unity-Linux.result != 'skipped' && needs.build-Account-Manager.result != 'skipped') }}
+    needs: [build-Unity-Windows, build-Unity-Linux, build-Unity-Android, build-Account-Manager]
+    if: ${{ always() && (needs.build-Unity-Windows.result != 'cancelled' && needs.build-Unity-Linux.result != 'cancelled' && needs.build-Unity-Android.result != 'cancelled' && needs.build-Account-Manager.result != 'cancelled') && (needs.build-Unity-Windows.result != 'skipped' && needs.build-Unity-Linux.result != 'skipped' && needs.build-Unity-Android.result != 'skipped' && needs.build-Account-Manager.result != 'skipped') }}
     runs-on: ubuntu-latest
     steps:
       - name: gọi API để lấy link artifact
@@ -226,8 +290,9 @@ jobs:
             json='${{ steps.get_artifact_links.outputs.artifact-data }}'
             output="Kết quả:"$'\n'
             output="${output}- Biên dịch QLTK: **${{ needs.build-Account-Manager.result }}**"$'\n'
-            output="${output}- Biên dịch game trên máy chủ Windows: **${{ needs.build-Unity-Windows.result }}**"$'\n'
-            output="${output}- Biên dịch game trên máy chủ Linux: **${{ needs.build-Unity-Linux.result }}**"$'\n'
+            output="${output}- Biên dịch game cho Windows: **${{ needs.build-Unity-Windows.result }}**"$'\n'
+            output="${output}- Biên dịch game cho Linux: **${{ needs.build-Unity-Linux.result }}**"$'\n'
+            output="${output}- Biên dịch Game cho Android: **${{ needs.build-Unity-Android.result }}**"$'\n'
             output="${output}$(echo ${json} | jq '.artifacts | length') Artifact:"$'\n'
             end_value=$(($(echo ${json} | jq '.artifacts | length') - 1))
             for i in $(seq 0 $end_value)
@@ -249,6 +314,7 @@ jobs:
             buildAccountManager="${{ needs.build-Account-Manager.result }}"
             buildUnityLinux="${{ needs.build-Unity-Linux.result }}"
             buildUnityWindows="${{ needs.build-Unity-Windows.result }}"
+            buildUnityAndroid="${{ needs.build-Unity-Android.result }}"
             failure_count=0
             if [ "$buildAccountManager" == "failure" ]; then
             ((failure_count++))
@@ -259,9 +325,14 @@ jobs:
             if [ "$buildUnityWindows" == "failure" ]; then
             ((failure_count++))
             fi
+            if [ "$buildUnityAndroid" == "failure" ]; then
+            ((failure_count++))
+            fi
             echo -n "color="
-            if [ "$failure_count" -eq 3 ]; then
+            if [ "$failure_count" -eq 4 ]; then
                 echo "0xff0000"
+            elif [ "$failure_count" -eq 3 ]; then
+            echo "0xff5a00"
             elif [ "$failure_count" -eq 2 ]; then
                 echo "0xffa500"
             elif [ "$failure_count" -eq 1 ]; then
