@@ -38,4 +38,4 @@ jobs:
             else
               echo "0x00ff00"
             fi
-          } >> "$GITHUB_ENV"
+          } 
