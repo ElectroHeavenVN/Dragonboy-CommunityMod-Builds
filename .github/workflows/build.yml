@@ -39,7 +39,7 @@ jobs:
       - name: Xóa cache trước đó
         if: ${{ steps.cache-restore.outputs.cache-hit }}
         continue-on-error: true
-        run: gh cache delete "${{ env.cache-key }}"
+        run: gh cache delete "${{ env.cache-key }} --repo ${{ github.repository }}" --repo ${{ github.repository }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Lưu cache mới
@@ -130,7 +130,7 @@ jobs:
         if: ${{ steps.cache-restore.outputs.cache-hit }}
         continue-on-error: true
         run: |
-          gh cache delete "Library-${{ matrix.targetPlatform }}"
+          gh cache delete "Library-${{ matrix.targetPlatform }}" --repo ${{ github.repository }} --repo ${{ github.repository }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Lưu cache
@@ -195,7 +195,7 @@ jobs:
         if: ${{ steps.cache-restore.outputs.cache-hit }}
         continue-on-error: true
         run: |
-          gh cache delete "Library-${{ matrix.targetPlatform }}"
+          gh cache delete "Library-${{ matrix.targetPlatform }}" --repo ${{ github.repository }} --repo ${{ github.repository }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Lưu cache
@@ -261,7 +261,7 @@ jobs:
         if: ${{ steps.cache-restore.outputs.cache-hit }}
         continue-on-error: true
         run: |
-          gh cache delete "Library-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}"
+          gh cache delete "Library-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}" --repo ${{ github.repository }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Lưu cache
