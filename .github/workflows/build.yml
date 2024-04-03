@@ -305,6 +305,7 @@ jobs:
                       url = "${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}"
                       description = $output
                       color = $color
+                      timestamp = (Get-Date).ToString("yyyy-MM-ddTHH:mm:ssZ")
                   }
               )
           }
