@@ -167,8 +167,7 @@ jobs:
           key: Library-${{ matrix.targetPlatform }}
       - name: Đổi scripting backend thành ${{ matrix.scriptingBackend }}
         run: cd GameProject && chmod +x set_scripting_backend.sh && ./set_scripting_backend.sh "DragonBoy/ProjectSettings/ProjectSettings.asset" "${{ matrix.targetPlatform }}" "${{ matrix.scriptingBackend }}"
-      - if: ${{ matrix.targetPlatform == 'Android' }} 
-        name: Giải phóng bộ nhớ (Android build)
+      - name: Giải phóng bộ nhớ
         uses: jlumbroso/free-disk-space@v1.3.1
       - name: Biên dịch dự án
         uses: game-ci/unity-builder@v4.2.3
@@ -233,8 +232,7 @@ jobs:
           key: Library-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
       - name: Đổi scripting backend thành ${{ matrix.scriptingBackend }}
         run: cd GameProject && chmod +x set_scripting_backend.sh && ./set_scripting_backend.sh "DragonBoy/ProjectSettings/ProjectSettings.asset" "${{ matrix.targetPlatform }}" "${{ matrix.scriptingBackend }}"
-      - if: ${{ matrix.targetPlatform == 'Android' }} 
-        name: Giải phóng bộ nhớ (Android build)
+      - name: Giải phóng bộ nhớ (Android build)
         uses: jlumbroso/free-disk-space@v1.3.1
       - name: Biên dịch dự án
         uses: game-ci/unity-builder@v4.2.3
