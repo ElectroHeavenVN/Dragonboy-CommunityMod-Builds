@@ -48,7 +48,7 @@ jobs:
           path: latest-commit.txt
           key: ${{ env.cache-key }}
   build-Account-Manager:
-    name: Biên dịch QLTK (Windows, ${{ matrix.configuration }}, .NET 8.0)
+    name: Biên dịch QLTK
     needs: [check-commit]
     if: needs.check-commit.outputs.cancel == 'false'
     strategy:
@@ -81,7 +81,7 @@ jobs:
         name: QLTK-${{ matrix.configuration }}
         path: QLTK/bin/${{ matrix.configuration }}
   build-Unity-Windows:
-    name: Biên dịch ${{ matrix.targetPlatform }} ${{ matrix.scriptingBackend }} trên máy chủ Windows
+    name: Biên dịch StandaloneWindows trên máy chủ Windows
     needs: [check-commit]
     if: needs.check-commit.outputs.cancel == 'false'
     runs-on: windows-latest
