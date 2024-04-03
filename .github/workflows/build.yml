@@ -189,7 +189,7 @@ jobs:
       - name: Upload file game đã biên dịch
         uses: actions/upload-artifact@v4.3.1
         with:
-          name: Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend}}
+          name: Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
           path: build/${{ matrix.targetPlatform }}
       - name: Xóa cache trước đó
         if: ${{ steps.cache-restore.outputs.cache-hit }}
@@ -254,7 +254,7 @@ jobs:
       - name: Upload file game đã biên dịch
         uses: actions/upload-artifact@v4.3.1
         with:
-          name: Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend}}
+          name: Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
           path: build/${{ matrix.targetPlatform }}
       - name: Xóa cache trước đó
         if: ${{ steps.cache-restore.outputs.cache-hit }}
