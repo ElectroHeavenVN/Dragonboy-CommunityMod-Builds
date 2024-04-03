@@ -7,7 +7,7 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - name: Tạo thông báo để gửi tới Discord webhook
+      - name: Gửi thông báo tới Discord webhook
         run: |
           $artifactsAPIUrl = (Invoke-RestMethod -Uri "https://api.github.com/repos/${{ github.repository }}/actions/workflows/build.yml/runs?per_page=1" -Headers @{Authorization = "Bearer ${{ secrets.GITHUB_TOKEN }}"}).workflow_runs[0].artifacts_url
           $artifacts = "artifact-data=" + (Invoke-RestMethod -Uri $artifactsAPIUrl -Headers @{Authorization = "Bearer ${{ secrets.GITHUB_TOKEN }}"}).artifacts
@@ -19,7 +19,6 @@ jobs:
           $failure_count = 0;
           if ($buildAccountManager -eq "failure") {$failure_count++} if ($buildUnityLinux -eq "failure") {$failure_count++} if ($buildUnityWindows -eq "failure") {$failure_count++} if ($buildUnityAndroid -eq "failure") {$failure_count++}
           if ($failure_count -eq 4) {$color = "0xff0000"} elseif ($failure_count -eq 3) {$color = "0xff5a00"} elseif ($failure_count -eq 2)  {$color = "0xffa500"} elseif ($failure_count -eq 1) {$color = "0xffff00"} else {$color = "0x00ff00"}
-          echo "color=$color" | Out-File -FilePath $env:GITHUB_ENV -Append
           
           $output = "Kết quả:`n
           - Biên dịch QLTK: **${buildAccountManager}**`n
@@ -30,18 +29,14 @@ jobs:
           for ($i = 0; $i -le $json.Count - 1; $i++) {
               $output += "$i. [$($json[$i].name)](https://github.com/${{ github.repository }}/actions/runs/$($json[$i].workflow_run.id)/artifacts/$($json[$i].id))`n"
           }
-          @"
-          OUTPUT=$output
-          "@ | Out-File -FilePath $env:GITHUB_ENV -Append
-      - run: echo "${{ env.OUTPUT }}"
-      - name: Gửi thông báo tới Discord webhook
-        uses: sarisia/actions-status-discord@v1.14.0
-        with:
-          webhook: ${{ secrets.DISCORD_WEBHOOK_TEST }}
-          nodetail: true
-          nofail: true
-          title: ${{ github.event.repository.name }}
-          url: ${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}
-          color: ${{ env.color }}
-          description: |
-            ${{ env.OUTPUT }}
+          $payload = [PSCustomObject]@{
+              username = "GitHub Actions Webhook"
+                embeds = @(
+                    @{
+                        title = ${{ github.event.repository.name }}
+                        description = $output
+                        color = $color
+                    }
+                )
+            }
+          Invoke-RestMethod -Uri ${{ secrets.DISCORD_WEBHOOK_TEST }} -Method Post -Body ($payload | ConvertTo-Json)
