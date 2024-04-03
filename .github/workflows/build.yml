@@ -281,31 +281,6 @@ jobs:
           output="artifact-data="
           output="${output}$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" $artifactsUrl)"
           echo $output >> "$GITHUB_OUTPUT"
-      - name: Tạo thông báo để gửi tới Discord webhook
-        run: |
-          {
-            echo 'OUTPUT<<EOF'
-            json='${{ steps.get_artifact_links.outputs.artifact-data }}'
-            output="Kết quả:"$'\n'
-            output="${output}- Biên dịch QLTK: **${{ needs.build-Account-Manager.result }}**"$'\n'
-            output="${output}- Biên dịch game cho Windows: **${{ needs.build-Unity-Windows.result }}**"$'\n'
-            output="${output}- Biên dịch game cho Linux: **${{ needs.build-Unity-Linux.result }}**"$'\n'
-            output="${output}- Biên dịch Game cho Android: **${{ needs.build-Unity-Android.result }}**"$'\n'
-            output="${output}$(echo ${json} | jq '.artifacts | length') Artifact:"$'\n'
-            end_value=$(($(echo ${json} | jq '.artifacts | length') - 1))
-            for i in $(seq 0 $end_value)
-            do
-              output="${output}- ["
-              output="${output}$(echo ${json} | jq -r ".artifacts[${i}].name")"
-              output="${output}](https://github.com/${{ github.repository }}/actions/runs/"
-              output="${output}$(echo ${json} | jq -r ".artifacts[${i}].workflow_run.id")"
-              output="${output}/artifacts/"
-              output="${output}$(echo ${json} | jq -r ".artifacts[${i}].id")"
-              output=$"${output}"')'$'\n'
-            done
-            echo "$output" 
-            echo EOF
-          } >> "$GITHUB_ENV"
       - name: Lấy màu cho thông báo
         run: |
           {
@@ -338,6 +313,31 @@ jobs:
             else
                 echo "0x00ff00"
             fi
+          } >> "$GITHUB_ENV"
+      - name: Tạo thông báo để gửi tới Discord webhook
+        run: |
+          {
+            echo 'OUTPUT<<EOF'
+            json='${{ steps.get_artifact_links.outputs.artifact-data }}'
+            output="Kết quả:"$'\n'
+            output="${output}- Biên dịch QLTK: **${{ needs.build-Account-Manager.result }}**"$'\n'
+            output="${output}- Biên dịch game cho Windows: **${{ needs.build-Unity-Windows.result }}**"$'\n'
+            output="${output}- Biên dịch game cho Linux: **${{ needs.build-Unity-Linux.result }}**"$'\n'
+            output="${output}- Biên dịch Game cho Android: **${{ needs.build-Unity-Android.result }}**"$'\n'
+            output="${output}$(echo ${json} | jq '.artifacts | length') Artifact:"$'\n'
+            end_value=$(($(echo ${json} | jq '.artifacts | length') - 1))
+            for i in $(seq 0 $end_value)
+            do
+              output="${output}- ["
+              output="${output}$(echo ${json} | jq -r ".artifacts[${i}].name")"
+              output="${output}](https://github.com/${{ github.repository }}/actions/runs/"
+              output="${output}$(echo ${json} | jq -r ".artifacts[${i}].workflow_run.id")"
+              output="${output}/artifacts/"
+              output="${output}$(echo ${json} | jq -r ".artifacts[${i}].id")"
+              output=$"${output}"')'$'\n'
+            done
+            echo "$output" 
+            echo EOF
           } >> "$GITHUB_ENV"
       - name: Gửi thông báo tới Discord webhook
         uses: sarisia/actions-status-discord@v1.14.0
