@@ -14,4 +14,5 @@ jobs:
           $buildUnityAndroid = "failure";
           $failure_count = 0;
           if ($buildAccountManager -eq "failure") {$failure_count++} if ($buildUnityLinux -eq "failure") {$failure_count++} if ($buildUnityWindows -eq "failure") {$failure_count++} if ($buildUnityAndroid -eq "failure") {$failure_count++}
-          if ($failure_count -eq 4) {Write-Host "color=0xff0000"} elseif ($failure_count -eq 3) {Write-Host "color=0xff5a00"} elseif ($failure_count -eq 2)  {Write-Host "color=0xffa500"} elseif ($failure_count -eq 1) {Write-Host "color=0xffff00"} else {Write-Host "color=0x00ff00"} | Out-File -FilePath $env:GITHUB_ENV -Append
+          if ($failure_count -eq 4) {$color = "0xff0000"} elseif ($failure_count -eq 3) {$color = "0xff5a00"} elseif ($failure_count -eq 2)  {$color = "0xffa500"} elseif ($failure_count -eq 1) {$color = "0xffff00"} else {$color = "0x00ff00"}
+          echo color=$color | Out-File -FilePath $env:GITHUB_ENV -Append
