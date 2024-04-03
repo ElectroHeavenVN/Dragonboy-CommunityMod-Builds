@@ -40,4 +40,4 @@ jobs:
                   }
               )
           }
-          Invoke-RestMethod -Uri ${{ secrets.DISCORD_WEBHOOK_TEST }} -Method Post -Body (ConvertTo-Json payload) -ContentType "application/json"
+          Invoke-RestMethod -Uri ${{ secrets.DISCORD_WEBHOOK_TEST }} -Method Post -Body (ConvertTo-Json $payload) -ContentType "application/json"
