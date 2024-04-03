@@ -15,27 +15,27 @@ jobs:
             buildUnityAndroid="failure"
             failure_count=0
             if [ "$buildAccountManager" == "failure" ]; then
-            ((failure_count++))
+              ((failure_count++))
             fi
             if [ "$buildUnityLinux" == "failure" ]; then
-            ((failure_count++))
+              ((failure_count++))
             fi
             if [ "$buildUnityWindows" == "failure" ]; then
-            ((failure_count++))
+              ((failure_count++))
             fi
             if [ "$buildUnityAndroid" == "failure" ]; then
-            ((failure_count++))
+              ((failure_count++))
             fi
             echo -n "color="
             if [ "$failure_count" -eq 4 ]; then
-                echo "0xff0000"
+              echo "0xff0000"
             elif [ "$failure_count" -eq 3 ]; then
-            echo "0xff5a00"
+              echo "0xff5a00"
             elif [ "$failure_count" -eq 2 ]; then
-                echo "0xffa500"
+              echo "0xffa500"
             elif [ "$failure_count" -eq 1 ]; then
-                echo "0xffff00"
+              echo "0xffff00"
             else
-                echo "0x00ff00"
+              echo "0x00ff00"
             fi
           } >> "$GITHUB_ENV"
