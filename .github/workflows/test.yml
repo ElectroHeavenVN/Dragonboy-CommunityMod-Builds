@@ -7,12 +7,39 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - run: |
-          $buildAccountManager = "success";
-          $buildUnityLinux = "success";
-          $buildUnityWindows = "success";
-          $buildUnityAndroid = "failure";
+      - name: Tạo thông báo để gửi tới Discord webhook
+        run: |
+          $artifactsAPIUrl = (Invoke-RestMethod -Uri "https://api.github.com/repos/${{ github.repository }}/actions/workflows/build.yml/runs?per_page=1" -Headers @{Authorization = "Bearer ${{ secrets.GITHUB_TOKEN }}"}).workflow_runs[0].artifacts_url
+          $artifacts = "artifact-data=" + (Invoke-RestMethod -Uri $artifactsAPIUrl -Headers @{Authorization = "Bearer ${{ secrets.GITHUB_TOKEN }}"}).artifacts
+
+          $buildAccountManager="success";
+          $buildUnityLinux="failure";
+          $buildUnityWindows="success";
+          $buildUnityAndroid="failure";
           $failure_count = 0;
           if ($buildAccountManager -eq "failure") {$failure_count++} if ($buildUnityLinux -eq "failure") {$failure_count++} if ($buildUnityWindows -eq "failure") {$failure_count++} if ($buildUnityAndroid -eq "failure") {$failure_count++}
           if ($failure_count -eq 4) {$color = "0xff0000"} elseif ($failure_count -eq 3) {$color = "0xff5a00"} elseif ($failure_count -eq 2)  {$color = "0xffa500"} elseif ($failure_count -eq 1) {$color = "0xffff00"} else {$color = "0x00ff00"}
-          echo color=$color | Out-File -FilePath $env:GITHUB_ENV -Append
+          echo "color=$color" | Out-File -FilePath $env:GITHUB_ENV -Append
+          
+          $output = "Kết quả:`n
+          - Biên dịch QLTK: **${buildAccountManager}**`n
+          - Biên dịch game cho Windows: **${buildUnityWindows}**`n
+          - Biên dịch game cho Linux: **${buildUnityLinux}**`n
+          - Biên dịch Game cho Android: **${buildUnityAndroid}**`n
+          $($json.Count) Artifact:`n"
+          for ($i = 0; $i -le $json.Count - 1; $i++) {
+              $output += "$i. [$($json[$i].name)](https://github.com/${{ github.repository }}/actions/runs/$($json[$i].workflow_run.id)/artifacts/$($json[$i].id))`n"
+          }
+          Write-Host "OUTPUT<<EOF`n${output}EOF"
+          >> "$GITHUB_ENV"
+      - name: Gửi thông báo tới Discord webhook
+        uses: sarisia/actions-status-discord@v1.14.0
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK_TEST }}
+          nodetail: true
+          nofail: true
+          title: ${{ github.event.repository.name }}
+          url: ${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}
+          color: ${{ env.color }}
+          description: |
+            ${{ env.OUTPUT }}
