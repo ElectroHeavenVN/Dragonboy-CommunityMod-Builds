@@ -4,7 +4,7 @@ Tự động kiểm tra commit mới và biên dịch [Dragonboy](https://github
 Các nền tảng được hỗ trợ: Windows, Linux, Android.
 ## Tải xuống
 - Chọn tab [Actions](../../actions) ở trên cùng.
-- Chọn workflow [Biên dịch dự án (QLTK, Game)](../../actions/workflows/build.yml) ở danh sách workflow bên trái.
+- Chọn workflow [Biên dịch QLTK và Game](../../actions/workflows/build.yml) ở danh sách workflow bên trái.
 - Chọn `workflow run` chạy thành công mới nhất.
 - Chọn file phù hợp với hệ điều hành của bạn trong phần `Artifacts`.
 

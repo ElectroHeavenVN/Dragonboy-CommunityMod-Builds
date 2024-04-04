@@ -1,10 +1,8 @@
-name: Biên dịch dự án (QLTK, Game)
-
+name: Biên dịch QLTK và Game
 on:
   schedule:
     - cron: "0 0 * * *"
   workflow_dispatch:
-
 jobs:
   check-commit:
     name: Kiểm tra commit mới
@@ -39,7 +37,7 @@ jobs:
       - name: Xóa cache trước đó
         if: ${{ steps.cache-restore.outputs.cache-hit }}
         continue-on-error: true
-        run: gh cache delete "${{ env.cache-key }} --repo ${{ github.repository }}" --repo ${{ github.repository }}
+        run: gh cache delete "${{ env.cache-key }} --repo ${{ github.repository }}"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Lưu cache mới
@@ -130,7 +128,7 @@ jobs:
         if: ${{ steps.cache-restore.outputs.cache-hit }}
         continue-on-error: true
         run: |
-          gh cache delete "Library-${{ matrix.targetPlatform }}" --repo ${{ github.repository }} --repo ${{ github.repository }}
+          gh cache delete "Library-${{ matrix.targetPlatform }}" --repo ${{ github.repository }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Lưu cache
@@ -195,7 +193,7 @@ jobs:
         if: ${{ steps.cache-restore.outputs.cache-hit }}
         continue-on-error: true
         run: |
-          gh cache delete "Library-${{ matrix.targetPlatform }}" --repo ${{ github.repository }} --repo ${{ github.repository }}
+          gh cache delete "Library-${{ matrix.targetPlatform }}" --repo ${{ github.repository }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Lưu cache
