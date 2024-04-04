@@ -36,7 +36,9 @@ jobs:
           targetPlatform: ${{ matrix.targetPlatform }}
           projectPath: GameProject/DragonBoy
           buildName: DragonBoy
-          allowDirtyBuild: true          
+          allowDirtyBuild: true
+          versioning: Custom
+          version: 2.4.0
       - name: Upload file game đã biên dịch
         uses: actions/upload-artifact@v4.3.1
         with:
@@ -94,6 +96,8 @@ jobs:
           projectPath: GameProject/DragonBoy
           buildName: DragonBoy
           allowDirtyBuild: true
+          versioning: Custom
+          version: 2.4.0
       - name: Upload file game đã biên dịch
         uses: actions/upload-artifact@v4.3.1
         with:
@@ -152,6 +156,8 @@ jobs:
           projectPath: GameProject/DragonBoy
           buildName: DragonBoy
           allowDirtyBuild: true
+          versioning: Custom
+          version: 2.4.0
       - name: Upload file game đã biên dịch
         uses: actions/upload-artifact@v4.3.1
         with:
