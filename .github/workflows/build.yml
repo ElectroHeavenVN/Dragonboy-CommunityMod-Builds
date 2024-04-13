@@ -105,7 +105,7 @@ jobs:
         uses: actions/cache@v4.0.2
         with:
           path: GameProject/DragonBoy/Library
-          key: Library-${{ matrix.targetPlatform }}
+          key: Library-Common
       - name: Đổi scripting backend thành ${{ matrix.scriptingBackend }}
         run: cd GameProject && pwsh ./set_scripting_backend.ps1 -projectSettingsPath "DragonBoy/ProjectSettings/ProjectSettings.asset" -platform ${{ matrix.targetPlatform }} -scriptingBackend ${{ matrix.scriptingBackend }} || powershell ./set_scripting_backend.ps1 -projectSettingsPath "DragonBoy/ProjectSettings/ProjectSettings.asset" -platform ${{ matrix.targetPlatform }} -scriptingBackend ${{ matrix.scriptingBackend }};     
       - name: Biên dịch dự án
@@ -130,14 +130,14 @@ jobs:
         if: ${{ steps.cache-restore.outputs.cache-hit }}
         continue-on-error: true
         run: |
-          gh cache delete "Library-${{ matrix.targetPlatform }}" --repo ${{ github.repository }}
+          gh cache delete "Library-Common" --repo ${{ github.repository }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Lưu cache
         uses: actions/cache/save@v4.0.2
         with: 
           path: GameProject/DragonBoy/Library
-          key: Library-${{ matrix.targetPlatform }}
+          key: Library-Common
   build-Unity-Linux:
     name: Biên dịch StandaloneLinux64 trên máy chủ Linux
     needs: [check-commit]
@@ -164,7 +164,7 @@ jobs:
         id: cache-restore
         with:
           path: GameProject/DragonBoy/Library
-          key: Library-${{ matrix.targetPlatform }}
+          key: Library-Linux
       - name: Đổi scripting backend thành ${{ matrix.scriptingBackend }}
         run: cd GameProject && chmod +x set_scripting_backend.sh && ./set_scripting_backend.sh "DragonBoy/ProjectSettings/ProjectSettings.asset" "${{ matrix.targetPlatform }}" "${{ matrix.scriptingBackend }}"
       - name: Giải phóng bộ nhớ
@@ -197,14 +197,14 @@ jobs:
         if: ${{ steps.cache-restore.outputs.cache-hit }}
         continue-on-error: true
         run: |
-          gh cache delete "Library-${{ matrix.targetPlatform }}" --repo ${{ github.repository }}
+          gh cache delete "Library-Linux" --repo ${{ github.repository }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Lưu cache
         uses: actions/cache/save@v4.0.2
         with: 
           path: GameProject/DragonBoy/Library
-          key: Library-${{ matrix.targetPlatform }}
+          key: Library-Linux
   build-Unity-Android:
     name: Biên dịch Android trên máy chủ Linux
     needs: [check-commit]
@@ -226,9 +226,17 @@ jobs:
         with:
           repository: pk9r327/Dragonboy
           ref: Unity-project
-      - name: Cache
+      - name: Cache (Common)
+        if: ${{ matrix.scriptingBackend == 'Mono' }}
         uses: actions/cache@v4.0.2
-        id: cache-restore
+        id: cache-restore-common
+        with:
+          path: GameProject/DragonBoy/Library
+          key: Library-Common
+      - name: Cache (IL2CPP)
+        if: ${{ matrix.scriptingBackend == 'IL2CPP' }}
+        uses: actions/cache@v4.0.2
+        id: cache-restore-il2cpp
         with:
           path: GameProject/DragonBoy/Library
           key: Library-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
@@ -261,18 +269,30 @@ jobs:
         with:
           name: Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
           path: build/${{ matrix.targetPlatform }}
-      - name: Xóa cache trước đó
-        if: ${{ steps.cache-restore.outputs.cache-hit }}
+      - name: Xóa cache trước đó (Common)
+        if: ${{ steps.cache-restore-common.outputs.cache-hit }}
+        continue-on-error: true
+        run: |
+          gh cache delete "Library-Common" --repo ${{ github.repository }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Xóa cache trước đó (IL2CPP)
+        if: ${{ steps.cache-restore-il2cpp.outputs.cache-hit }}
         continue-on-error: true
         run: |
           gh cache delete "Library-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}" --repo ${{ github.repository }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Lưu cache
+      - name: Lưu cache (Common)
         uses: actions/cache/save@v4.0.2
         with: 
           path: GameProject/DragonBoy/Library
-          key: Library-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}    
+          key: Library-Common
+      - name: Lưu cache (IL2CPP)
+        uses: actions/cache/save@v4.0.2
+        with: 
+          path: GameProject/DragonBoy/Library
+          key: Library-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
   send-artifact-links-announcement:
     name: Gửi link artifact tới Discord webhook
     needs: [build-Unity-Windows, build-Unity-Linux, build-Unity-Android, build-Account-Manager]
