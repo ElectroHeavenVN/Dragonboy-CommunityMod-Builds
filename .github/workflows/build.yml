@@ -284,11 +284,13 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Lưu cache (Common)
+        if: ${{ matrix.scriptingBackend == 'Mono' }}
         uses: actions/cache/save@v4.0.2
         with: 
           path: GameProject/DragonBoy/Library
           key: Library-Common
       - name: Lưu cache (IL2CPP)
+        if: ${{ matrix.scriptingBackend == 'IL2CPP' }}
         uses: actions/cache/save@v4.0.2
         with: 
           path: GameProject/DragonBoy/Library
