@@ -38,7 +38,7 @@ jobs:
           buildName: DragonBoy
           allowDirtyBuild: true
           versioning: Custom
-          version: 2.4.0
+          version: 0.0.1
       - name: Upload file game đã biên dịch
         uses: actions/upload-artifact@v4.3.1
         with:
@@ -97,7 +97,7 @@ jobs:
           buildName: DragonBoy
           allowDirtyBuild: true
           versioning: Custom
-          version: 2.4.0
+          version: 0.0.1
       - name: Upload file game đã biên dịch
         uses: actions/upload-artifact@v4.3.1
         with:
@@ -157,7 +157,7 @@ jobs:
           buildName: DragonBoy
           allowDirtyBuild: true
           versioning: Custom
-          version: 2.4.0
+          version: 0.0.1
       - name: Upload file game đã biên dịch
         uses: actions/upload-artifact@v4.3.1
         with:
