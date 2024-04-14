@@ -23,7 +23,7 @@ jobs:
         uses: actions/cache@v4.0.2
         with:
           path: GameProject/DragonBoy/Library
-          key: Library-Common
+          key: Library-Windows
       - name: Đổi scripting backend thành Mono
         run: cd GameProject && pwsh ./set_scripting_backend.ps1 -projectSettingsPath "DragonBoy/ProjectSettings/ProjectSettings.asset" -platform ${{ matrix.targetPlatform }} -scriptingBackend Mono || powershell ./set_scripting_backend.ps1 -projectSettingsPath "DragonBoy/ProjectSettings/ProjectSettings.asset" -platform ${{ matrix.targetPlatform }} -scriptingBackend Mono;     
       - name: Biên dịch dự án
@@ -48,14 +48,14 @@ jobs:
         if: ${{ steps.cache-restore.outputs.cache-hit }}
         continue-on-error: true
         run: |
-          gh cache delete "Library-Common" --repo ${{ github.repository }}
+          gh cache delete "Library-Windows" --repo ${{ github.repository }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Lưu cache
         uses: actions/cache/save@v4.0.2
         with: 
           path: GameProject/DragonBoy/Library
-          key: Library-Common
+          key: Library-Windows
   build-Unity-Linux:
     name: Biên dịch StandaloneLinux64 trên máy chủ Linux
     runs-on: ubuntu-latest
@@ -127,7 +127,7 @@ jobs:
         id: cache-restore
         with:
           path: GameProject/DragonBoy/Library
-          key: Library-Common
+          key: Library-Linux
       - name: Đổi scripting backend thành Mono
         run: cd GameProject && chmod +x set_scripting_backend.sh && ./set_scripting_backend.sh "DragonBoy/ProjectSettings/ProjectSettings.asset" "Android" "Mono"
       - name: Giải phóng bộ nhớ (Android build)
@@ -161,11 +161,11 @@ jobs:
         if: ${{ steps.cache-restore.outputs.cache-hit }}
         continue-on-error: true
         run: |
-          gh cache delete "Library-Common" --repo ${{ github.repository }}
+          gh cache delete "Library-Linux" --repo ${{ github.repository }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Lưu cache
         uses: actions/cache/save@v4.0.2
         with: 
           path: GameProject/DragonBoy/Library
-          key: Library-Common
+          key: Library-Linux

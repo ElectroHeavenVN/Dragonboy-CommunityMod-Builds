@@ -105,7 +105,7 @@ jobs:
         uses: actions/cache@v4.0.2
         with:
           path: GameProject/DragonBoy/Library
-          key: Library-Common
+          key: Library-Windows
       - name: Đổi scripting backend thành ${{ matrix.scriptingBackend }}
         run: cd GameProject && pwsh ./set_scripting_backend.ps1 -projectSettingsPath "DragonBoy/ProjectSettings/ProjectSettings.asset" -platform ${{ matrix.targetPlatform }} -scriptingBackend ${{ matrix.scriptingBackend }} || powershell ./set_scripting_backend.ps1 -projectSettingsPath "DragonBoy/ProjectSettings/ProjectSettings.asset" -platform ${{ matrix.targetPlatform }} -scriptingBackend ${{ matrix.scriptingBackend }};     
       - name: Biên dịch dự án
@@ -130,14 +130,14 @@ jobs:
         if: ${{ steps.cache-restore.outputs.cache-hit }}
         continue-on-error: true
         run: |
-          gh cache delete "Library-Common" --repo ${{ github.repository }}
+          gh cache delete "Library-Windows" --repo ${{ github.repository }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Lưu cache
         uses: actions/cache/save@v4.0.2
         with: 
           path: GameProject/DragonBoy/Library
-          key: Library-Common
+          key: Library-Windows
   build-Unity-Linux:
     name: Biên dịch StandaloneLinux64 trên máy chủ Linux
     needs: [check-commit]
@@ -220,13 +220,13 @@ jobs:
         with:
           repository: pk9r327/Dragonboy
           ref: Unity-project
-      - name: Cache (Common)
+      - name: Cache
         if: ${{ matrix.scriptingBackend == 'Mono' }}
         uses: actions/cache@v4.0.2
-        id: cache-restore-common
+        id: cache-restore
         with:
           path: GameProject/DragonBoy/Library
-          key: Library-Common
+          key: Library-Linux
       - name: Cache (IL2CPP)
         if: ${{ matrix.scriptingBackend == 'IL2CPP' }}
         uses: actions/cache@v4.0.2
@@ -263,11 +263,11 @@ jobs:
         with:
           name: Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
           path: build/${{ matrix.targetPlatform }}
-      - name: Xóa cache trước đó (Common)
-        if: ${{ steps.cache-restore-common.outputs.cache-hit }}
+      - name: Xóa cache trước đó
+        if: ${{ steps.cache-restore.outputs.cache-hit }}
         continue-on-error: true
         run: |
-          gh cache delete "Library-Common" --repo ${{ github.repository }}
+          gh cache delete "Library-Linux" --repo ${{ github.repository }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Xóa cache trước đó (IL2CPP)
@@ -277,12 +277,12 @@ jobs:
           gh cache delete "Library-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}" --repo ${{ github.repository }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Lưu cache (Common)
+      - name: Lưu cache
         if: ${{ matrix.scriptingBackend == 'Mono' }}
         uses: actions/cache/save@v4.0.2
         with: 
           path: GameProject/DragonBoy/Library
-          key: Library-Common
+          key: Library-Linux
       - name: Lưu cache (IL2CPP)
         if: ${{ matrix.scriptingBackend == 'IL2CPP' }}
         uses: actions/cache/save@v4.0.2
