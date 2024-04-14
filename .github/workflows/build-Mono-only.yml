@@ -87,12 +87,6 @@ jobs:
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           targetPlatform: StandaloneLinux64
-          androidKeystoreName: DragonBoy-pk9r327-UnityProject.keystore # This file won't exist, but this property needs to exist.
-          androidKeystoreBase64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          androidKeystorePass: ${{ secrets.ANDROID_KEYSTORE_PASS }}
-          androidKeyaliasName: ${{ secrets.ANDROID_KEYALIAS_NAME }}
-          androidKeyaliasPass: ${{ secrets.ANDROID_KEYALIAS_PASS }}
-          androidTargetSdkVersion: AndroidApiLevel33
           projectPath: GameProject/DragonBoy
           buildName: DragonBoy
           allowDirtyBuild: true
@@ -152,7 +146,7 @@ jobs:
           androidKeystorePass: ${{ secrets.ANDROID_KEYSTORE_PASS }}
           androidKeyaliasName: ${{ secrets.ANDROID_KEYALIAS_NAME }}
           androidKeyaliasPass: ${{ secrets.ANDROID_KEYALIAS_PASS }}
-          androidTargetSdkVersion: AndroidApiLevel33
+          androidTargetSdkVersion: AndroidApiLevel29
           projectPath: GameProject/DragonBoy
           buildName: DragonBoy
           allowDirtyBuild: true
