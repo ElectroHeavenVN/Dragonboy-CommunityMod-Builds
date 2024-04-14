@@ -24,6 +24,7 @@ jobs:
         with:
           path: GameProject/DragonBoy/Library
           key: Library-Common
+          enableCrossOsArchive: true
       - name: Đổi scripting backend thành IL2CPP
         run: cd GameProject && pwsh ./set_scripting_backend.ps1 -projectSettingsPath "DragonBoy/ProjectSettings/ProjectSettings.asset" -platform ${{ matrix.targetPlatform }} -scriptingBackend IL2CPP || powershell ./set_scripting_backend.ps1 -projectSettingsPath "DragonBoy/ProjectSettings/ProjectSettings.asset" -platform ${{ matrix.targetPlatform }} -scriptingBackend IL2CPP;     
       - name: Biên dịch dự án
@@ -56,6 +57,7 @@ jobs:
         with: 
           path: GameProject/DragonBoy/Library
           key: Library-Common
+          enableCrossOsArchive: true
   build-Unity-Linux:
     name: Biên dịch StandaloneLinux64 trên máy chủ Linux
     runs-on: ubuntu-latest

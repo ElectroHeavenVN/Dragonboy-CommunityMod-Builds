@@ -106,6 +106,7 @@ jobs:
         with:
           path: GameProject/DragonBoy/Library
           key: Library-Common
+          enableCrossOsArchive: true
       - name: Đổi scripting backend thành ${{ matrix.scriptingBackend }}
         run: cd GameProject && pwsh ./set_scripting_backend.ps1 -projectSettingsPath "DragonBoy/ProjectSettings/ProjectSettings.asset" -platform ${{ matrix.targetPlatform }} -scriptingBackend ${{ matrix.scriptingBackend }} || powershell ./set_scripting_backend.ps1 -projectSettingsPath "DragonBoy/ProjectSettings/ProjectSettings.asset" -platform ${{ matrix.targetPlatform }} -scriptingBackend ${{ matrix.scriptingBackend }};     
       - name: Biên dịch dự án
@@ -138,6 +139,7 @@ jobs:
         with: 
           path: GameProject/DragonBoy/Library
           key: Library-Common
+          enableCrossOsArchive: true
   build-Unity-Linux:
     name: Biên dịch StandaloneLinux64 trên máy chủ Linux
     needs: [check-commit]
@@ -227,6 +229,7 @@ jobs:
         with:
           path: GameProject/DragonBoy/Library
           key: Library-Common
+          enableCrossOsArchive: true
       - name: Cache (IL2CPP)
         if: ${{ matrix.scriptingBackend == 'IL2CPP' }}
         uses: actions/cache@v4.0.2
@@ -283,6 +286,7 @@ jobs:
         with: 
           path: GameProject/DragonBoy/Library
           key: Library-Common
+          enableCrossOsArchive: true
       - name: Lưu cache (IL2CPP)
         if: ${{ matrix.scriptingBackend == 'IL2CPP' }}
         uses: actions/cache/save@v4.0.2
