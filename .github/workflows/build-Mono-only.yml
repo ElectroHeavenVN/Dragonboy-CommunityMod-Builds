@@ -24,7 +24,6 @@ jobs:
         with:
           path: GameProject/DragonBoy/Library
           key: Library-Common
-          enableCrossOsArchive: true
       - name: Đổi scripting backend thành Mono
         run: cd GameProject && pwsh ./set_scripting_backend.ps1 -projectSettingsPath "DragonBoy/ProjectSettings/ProjectSettings.asset" -platform ${{ matrix.targetPlatform }} -scriptingBackend Mono || powershell ./set_scripting_backend.ps1 -projectSettingsPath "DragonBoy/ProjectSettings/ProjectSettings.asset" -platform ${{ matrix.targetPlatform }} -scriptingBackend Mono;     
       - name: Biên dịch dự án
@@ -57,7 +56,6 @@ jobs:
         with: 
           path: GameProject/DragonBoy/Library
           key: Library-Common
-          enableCrossOsArchive: true
   build-Unity-Linux:
     name: Biên dịch StandaloneLinux64 trên máy chủ Linux
     runs-on: ubuntu-latest
@@ -130,7 +128,6 @@ jobs:
         with:
           path: GameProject/DragonBoy/Library
           key: Library-Common
-          enableCrossOsArchive: true
       - name: Đổi scripting backend thành Mono
         run: cd GameProject && chmod +x set_scripting_backend.sh && ./set_scripting_backend.sh "DragonBoy/ProjectSettings/ProjectSettings.asset" "Android" "Mono"
       - name: Giải phóng bộ nhớ (Android build)
@@ -172,4 +169,3 @@ jobs:
         with: 
           path: GameProject/DragonBoy/Library
           key: Library-Common
-          enableCrossOsArchive: true
