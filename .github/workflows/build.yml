@@ -117,7 +117,7 @@ jobs:
         with:
           targetPlatform: ${{ matrix.targetPlatform }}
           projectPath: GameProject/DragonBoy
-          buildName: DragonBoy
+          buildName: DragonBoy CommunityMod
           allowDirtyBuild: true
           versioning: Custom
           version: 0.0.1
@@ -178,7 +178,7 @@ jobs:
         with:
           targetPlatform: ${{ matrix.targetPlatform }}
           projectPath: GameProject/DragonBoy
-          buildName: DragonBoy
+          buildName: DragonBoy CommunityMod
           allowDirtyBuild: true
           versioning: Custom
           version: 0.0.1
@@ -254,7 +254,7 @@ jobs:
           androidKeyaliasPass: ${{ secrets.ANDROID_KEYALIAS_PASS }}
           androidTargetSdkVersion: AndroidApiLevel29
           projectPath: GameProject/DragonBoy
-          buildName: DragonBoy
+          buildName: DragonBoy CommunityMod
           allowDirtyBuild: true
           versioning: Custom
           version: 0.0.1
