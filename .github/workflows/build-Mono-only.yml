@@ -24,6 +24,16 @@ jobs:
         with:
           path: GameProject/DragonBoy/Library
           key: Library-Windows
+      - name: Tải artifact Build-${{ matrix.targetPlatform }}-Mono
+        uses: dawidd6/action-download-artifact@v3.1.4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          workflow_search: false
+          workflow_conclusion: success
+          if_no_artifact_found: warn
+          allow_forks: false
+          name: Build-${{ matrix.targetPlatform }}-Mono
+          path: build/${{ matrix.targetPlatform }}
       - name: Đổi scripting backend thành Mono
         run: cd GameProject && pwsh ./set_scripting_backend.ps1 -projectSettingsPath "DragonBoy/ProjectSettings/ProjectSettings.asset" -platform ${{ matrix.targetPlatform }} -scriptingBackend Mono || powershell ./set_scripting_backend.ps1 -projectSettingsPath "DragonBoy/ProjectSettings/ProjectSettings.asset" -platform ${{ matrix.targetPlatform }} -scriptingBackend Mono;     
       - name: Biên dịch dự án
@@ -75,6 +85,16 @@ jobs:
         with:
           path: GameProject/DragonBoy/Library
           key: Library-Linux
+      - name: Tải artifact Build-StandaloneLinux64-Mono
+        uses: dawidd6/action-download-artifact@v3.1.4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          workflow_search: false
+          workflow_conclusion: success
+          if_no_artifact_found: warn
+          allow_forks: false
+          name: Build-StandaloneLinux64-Mono
+          path: build/${{ matrix.targetPlatform }}
       - name: Đổi scripting backend thành Mono
         run: cd GameProject && chmod +x set_scripting_backend.sh && ./set_scripting_backend.sh "DragonBoy/ProjectSettings/ProjectSettings.asset" "StandaloneLinux64" "Mono"
       - name: Giải phóng bộ nhớ
@@ -128,6 +148,16 @@ jobs:
         with:
           path: GameProject/DragonBoy/Library
           key: Library-Linux
+      - name: Tải artifact Build-Android-Mono
+        uses: dawidd6/action-download-artifact@v3.1.4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          workflow_search: false
+          workflow_conclusion: success
+          if_no_artifact_found: warn
+          allow_forks: false
+          name: Build-Android-Mono
+          path: build/Android
       - name: Đổi scripting backend thành Mono
         run: cd GameProject && chmod +x set_scripting_backend.sh && ./set_scripting_backend.sh "DragonBoy/ProjectSettings/ProjectSettings.asset" "Android" "Mono"
       - name: Giải phóng bộ nhớ (Android build)
