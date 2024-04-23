@@ -1,43 +1,77 @@
 name: Test
 on: workflow_dispatch
 jobs:
-  Test:
-    name: Test
+  build-Unity-Windows:
+    name: Biên dịch StandaloneWindows trên máy chủ Windows
     runs-on: windows-latest
     strategy:
       fail-fast: false
+      matrix:
+        targetPlatform:
+          - StandaloneWindows
+          - StandaloneWindows64
+          - StandaloneWindowsArm64
+        scriptingBackend:
+          - Mono2x 
+          - IL2CPP
+    permissions:
+      actions: write
     steps:
-      - name: Gửi thông báo tới Discord webhook
+      - name: Clone pk9r327/Dragonboy branch Unity-project-v2023
+        uses: actions/checkout@v4.1.1
+        with:
+          repository: pk9r327/Dragonboy
+          ref: Unity-project-v2023
+      - name: Cache
+        id: cache-restore
+        uses: actions/cache@v4.0.2
+        with:
+          path: GameProject/DragonBoy/Library
+          key: Library-Windows   
+      - name: Biên dịch dự án
+        if: ${{ matrix.targetPlatform != 'StandaloneWindowsArm64' }}
+        uses: game-ci/unity-builder@v4.2.3
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: ${{ matrix.targetPlatform }}
+          projectPath: GameProject/DragonBoy
+          buildName: DragonBoy CommunityMod
+          versioning: Custom
+          version: 0.0.1
+          buildMethod: UnityBuilderAction.BuildScript.Build
+          customParameters: -scriptingBackend ${{ matrix.scriptingBackend }}
+      - name: Biên dịch dự án (Arm64)
+        if: ${{ matrix.targetPlatform == 'StandaloneWindowsArm64' }}
+        uses: game-ci/unity-builder@v4.2.3
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: StandaloneWindows64
+          projectPath: GameProject/DragonBoy
+          buildName: DragonBoy CommunityMod
+          versioning: Custom
+          version: 0.0.1
+          buildMethod: UnityBuilderAction.BuildScript.Build
+          customParameters: -scriptingBackend ${{ matrix.scriptingBackend }} -architecture ARM64
+      - name: Upload file game đã biên dịch
+        uses: actions/upload-artifact@v4.3.1
+        with:
+          name: Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
+          path: build/${{ matrix.targetPlatform }}
+      - name: Xóa cache trước đó
+        if: ${{ steps.cache-restore.outputs.cache-hit }}
+        continue-on-error: true
         run: |
-          $artifactsAPIUrl = (Invoke-RestMethod -Uri "https://api.github.com/repos/${{ github.repository }}/actions/workflows/build.yml/runs?per_page=1" -Headers @{Authorization = "Bearer ${{ secrets.GITHUB_TOKEN }}"}).workflow_runs[0].artifacts_url
-          $artifacts = "artifact-data=" + (Invoke-RestMethod -Uri $artifactsAPIUrl -Headers @{Authorization = "Bearer ${{ secrets.GITHUB_TOKEN }}"}).artifacts
-
-          $buildAccountManager="success";
-          $buildUnityLinux="failure";
-          $buildUnityWindows="success";
-          $buildUnityAndroid="failure";
-          $failure_count = 0;
-          if ($buildAccountManager -eq "failure") {$failure_count++} if ($buildUnityLinux -eq "failure") {$failure_count++} if ($buildUnityWindows -eq "failure") {$failure_count++} if ($buildUnityAndroid -eq "failure") {$failure_count++}
-          if ($failure_count -eq 4) {$color = 0xff0000} elseif ($failure_count -eq 3) {$color = 0xff5a00} elseif ($failure_count -eq 2)  {$color = 0xffa500} elseif ($failure_count -eq 1) {$color = 0xffff00} else {$color = 0x00ff00}
-          
-          $output = "Kết quả:
-          - Biên dịch QLTK: **${buildAccountManager}**
-          - Biên dịch game cho Windows: **${buildUnityWindows}**
-          - Biên dịch game cho Linux: **${buildUnityLinux}**
-          - Biên dịch Game cho Android: **${buildUnityAndroid}**"
-          if ($json.Count -gt 1) {$output += "`r`n$($json.Count) Artifact:"}
-          for ($i = 0; $i -le $json.Count - 1; $i++) {
-              $output += "`r`n$i. [$($json[$i].name)](https://github.com/${{ github.repository }}/actions/runs/$($json[$i].workflow_run.id)/artifacts/$($json[$i].id))"
-          }
-          $payload = [PSCustomObject]@{
-              username = "GitHub Actions Webhook"
-              embeds = @(
-                  @{
-                      title = "${{ github.event.repository.name }}"
-                      url = "${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}"
-                      description = $output
-                      color = $color
-                  }
-              )
-          }
-          Invoke-RestMethod -Uri ${{ secrets.DISCORD_WEBHOOK_TEST }} -Method Post -Body (ConvertTo-Json $payload) -ContentType "application/json"
+          gh cache delete "Library-Windows" --repo ${{ github.repository }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Lưu cache
+        uses: actions/cache/save@v4.0.2
+        with: 
+          path: GameProject/DragonBoy/Library
+          key: Library-Windows
