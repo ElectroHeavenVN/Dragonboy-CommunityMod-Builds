@@ -59,6 +59,13 @@ jobs:
           buildMethod: UnityBuilderAction.BuildScript.Build
           customParameters: -scriptingBackend ${{ matrix.scriptingBackend }} -architecture ARM64
       - name: Upload file game đã biên dịch
+        if: ${{ matrix.targetPlatform != 'StandaloneWindowsArm64' }}
+        uses: actions/upload-artifact@v4.3.1
+        with:
+          name: Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
+          path: build/StandaloneWindows64
+      - name: Upload file game đã biên dịch (Arm64)
+        if: ${{ matrix.targetPlatform == 'StandaloneWindowsArm64' }}
         uses: actions/upload-artifact@v4.3.1
         with:
           name: Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
