@@ -1,0 +1,415 @@
+name: Biên dịch QLTK và Game
+on:
+  workflow_dispatch:
+    inputs:
+      mono-scripting-backend:
+        description: 'Build Mono?'
+        type: boolean
+        required: true
+        default: true
+      il2cpp-scripting-backend:
+        description: 'Build IL2CPP?'
+        type: boolean
+        required: true
+        default: true
+      check-new-commit:
+        description: 'Kiểm tra commit mới?'
+        type: boolean
+        required: true
+        default: true
+      build-Account-Manager:
+        description: 'Biên dịch QLTK?'
+        type: boolean
+        required: true
+        default: true
+      build-Unity-Windows:
+        description: 'Biên dịch Game cho HĐH Windows?'
+        type: boolean
+        required: true
+        default: true
+      build-Unity-Linux:
+        description: 'Biên dịch Game cho HĐH Linux?'
+        type: boolean
+        required: true
+        default: true
+      build-Unity-Android:
+        description: 'Biên dịch Game cho HĐH Android?'
+        type: boolean
+        required: true
+        default: true
+      send-artifact-links-announcement:
+        description: 'Gửi link artifact tới Discord webhook?'
+        type: boolean
+        required: true
+        default: true
+jobs:
+  check-new-commit:
+    name: Kiểm tra commit mới
+    if: github.event.inputs.check-new-commit == 'true'
+    runs-on: windows-latest
+    outputs:
+      cancel: ${{ steps.check_hash.outputs.cancel }}
+    strategy:
+      fail-fast: false
+    env:
+      cache-key: latest-commit
+    permissions:
+      actions: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.1.1
+      - name: Lấy hash commit mới nhất của branch Unity-project
+        run: |
+          $commit = git ls-remote https://github.com/pk9r327/Dragonboy.git Unity-project
+          $hash = $commit.Split("`t")[0]
+          echo "LATEST_COMMIT=$hash" | Out-File -FilePath $env:GITHUB_ENV -Append
+      - name: Cache hash commit
+        id: cache-restore
+        uses: actions/cache/restore@v4.0.2
+        with:
+          path: latest-commit.txt
+          key: ${{ env.cache-key }}
+      - name: kiểm tra hash
+        id: check_hash
+        run: $hash = "${{ env.LATEST_COMMIT }}"; if ((Test-Path latest-commit.txt -PathType Leaf)) { $commitContent = Get-Content -Path latest-commit.txt; $output = ($commitContent -eq $hash).ToString().ToLower(); } else { $output = "false" } $output = "cancel=$output".ToString().ToLower(); echo $output | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
+      - name: Lấy hash commit mới nhất
+        run: echo "${{ env.LATEST_COMMIT }}" > latest-commit.txt
+      - name: Xóa cache trước đó
+        if: ${{ steps.cache-restore.outputs.cache-hit }}
+        continue-on-error: true
+        run: gh cache delete "${{ env.cache-key }}" --repo ${{ github.repository }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Lưu cache mới
+        uses: actions/cache/save@v4.0.2
+        with: 
+          path: latest-commit.txt
+          key: ${{ env.cache-key }}
+  build-Account-Manager:
+    name: Biên dịch QLTK
+    needs: [check-new-commit]
+    if: needs.check-new-commit.outputs.cancel == 'false' && github.event.inputs.build-Account-Manager == 'true'
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+    runs-on: windows-latest
+    env:
+      Solution-Path: QLTK\QLTK.sln
+    steps:
+    - name: Clone pk9r327/Dragonboy branch Unity-project
+      uses: actions/checkout@v4.1.1
+      with:
+        repository: pk9r327/Dragonboy
+        ref: Unity-project
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+    - name: Setup NuGet
+      uses: nuget/setup-nuget@v2
+    - name: Khôi phục dự án
+      run: msbuild ${{ env.Solution-Path }} /t:Restore /p:Configuration=$env:Configuration && nuget restore ${{ env.Solution-Path }}
+      env:
+        Configuration: ${{ matrix.configuration }}
+    - name: Biên dịch dự án
+      run: msbuild ${{ env.Solution-Path }} -t:rebuild -property:Configuration=$env:Configuration
+      env:
+        Configuration: ${{ matrix.configuration }}
+    - name: Upload file đã biên dịch
+      uses: actions/upload-artifact@v4.3.1
+      with:
+        name: QLTK-${{ matrix.configuration }}
+        path: QLTK/bin/${{ matrix.configuration }}
+  build-Unity-Windows:
+    name: Biên dịch StandaloneWindows trên máy chủ Windows
+    needs: [check-new-commit]
+    if: needs.check-new-commit.outputs.cancel == 'false' && github.event.inputs.build-Unity-Windows == 'true'
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        targetPlatform:
+          - StandaloneWindows 
+          - StandaloneWindows64 
+          - StandaloneWindowsArm64
+        scriptingBackend: ${{ github.event.inputs.mono-scripting-backend == 'true' && github.event.inputs.il2cpp-scripting-backend == 'true' && 'Mono2x,IL2CPP' || github.event.inputs.mono-scripting-backend == 'true' && 'Mono2x' || github.event.inputs.il2cpp-scripting-backend == 'true' && 'IL2CPP' }}
+    permissions:
+      actions: write
+    steps:
+      - name: Clone pk9r327/Dragonboy branch Unity-project
+        uses: actions/checkout@v4.1.1
+        with:
+          repository: pk9r327/Dragonboy
+          ref: Unity-project
+      - name: Cache
+        id: cache-restore
+        uses: actions/cache@v4.0.2
+        with:
+          path: GameProject/DragonBoy/Library
+          key: Library-Windows
+      - name: Tải artifact Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
+        uses: dawidd6/action-download-artifact@v3.1.4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          workflow_search: false
+          workflow_conclusion: success
+          if_no_artifact_found: warn
+          allow_forks: false
+          name: Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
+          path: build/${{ matrix.targetPlatform }}
+      - name: Biên dịch dự án
+        if: ${{ matrix.targetPlatform != 'StandaloneWindowsArm64' }}
+        uses: game-ci/unity-builder@v4.2.3
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: ${{ matrix.targetPlatform }}
+          projectPath: GameProject/DragonBoy
+          buildName: DragonBoy CommunityMod
+          versioning: Custom
+          version: 0.0.1
+          buildMethod: UnityBuilderAction.BuildScript.Build
+          customParameters: -scriptingBackend ${{ matrix.scriptingBackend }}
+      - name: Biên dịch dự án (Arm64)
+        if: ${{ matrix.targetPlatform == 'StandaloneWindowsArm64' }}
+        uses: game-ci/unity-builder@v4.2.3
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: StandaloneWindows64
+          projectPath: GameProject/DragonBoy
+          buildName: DragonBoy CommunityMod
+          versioning: Custom
+          version: 0.0.1
+          buildMethod: UnityBuilderAction.BuildScript.Build
+          customParameters: -scriptingBackend ${{ matrix.scriptingBackend }} -architecture ARM64
+      - name: Upload file game đã biên dịch
+        if: ${{ matrix.targetPlatform != 'StandaloneWindowsArm64' }}
+        uses: actions/upload-artifact@v4.3.1
+        with:
+          name: Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
+          path: build/${{ matrix.targetPlatform }}
+      - name: Upload file game đã biên dịch (Arm64)
+        if: ${{ matrix.targetPlatform == 'StandaloneWindowsArm64' }}
+        uses: actions/upload-artifact@v4.3.1
+        with:
+          name: Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
+          path: build/StandaloneWindows64
+      - name: Xóa cache trước đó
+        if: ${{ steps.cache-restore.outputs.cache-hit }}
+        continue-on-error: true
+        run: |
+          gh cache delete "Library-Windows" --repo ${{ github.repository }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Lưu cache
+        uses: actions/cache/save@v4.0.2
+        with: 
+          path: GameProject/DragonBoy/Library
+          key: Library-Windows
+  build-Unity-Linux:
+    name: Biên dịch StandaloneLinux64 trên máy chủ Linux
+    needs: [check-new-commit]
+    if: needs.check-new-commit.outputs.cancel == 'false' && github.event.inputs.build-Unity-Linux == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        targetPlatform:
+          - StandaloneLinux64
+        scriptingBackend: ${{ github.event.inputs.mono-scripting-backend == 'true' && github.event.inputs.il2cpp-scripting-backend == 'true' && 'Mono2x,IL2CPP' || github.event.inputs.mono-scripting-backend == 'true' && 'Mono2x' || github.event.inputs.il2cpp-scripting-backend == 'true' && 'IL2CPP' }}
+    permissions:
+      actions: write
+    steps: 
+      - name: Clone pk9r327/Dragonboy branch Unity-project
+        uses: actions/checkout@v4.1.1
+        with:
+          repository: pk9r327/Dragonboy
+          ref: Unity-project
+      - name: Cache
+        uses: actions/cache@v4.0.2
+        id: cache-restore
+        with:
+          path: GameProject/DragonBoy/Library
+          key: Library-Linux
+      - name: Tải artifact Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
+        uses: dawidd6/action-download-artifact@v3.1.4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          workflow_search: false
+          workflow_conclusion: success
+          if_no_artifact_found: warn
+          allow_forks: false
+          name: Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
+          path: build/${{ matrix.targetPlatform }}
+      - name: Giải phóng bộ nhớ
+        uses: jlumbroso/free-disk-space@v1.3.1
+      - name: Biên dịch dự án
+        uses: game-ci/unity-builder@v4.2.3
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: ${{ matrix.targetPlatform }}
+          projectPath: GameProject/DragonBoy
+          buildName: DragonBoy CommunityMod
+          versioning: Custom
+          version: 0.0.1
+          buildMethod: UnityBuilderAction.BuildScript.Build
+          customParameters: -scriptingBackend ${{ matrix.scriptingBackend }}
+      - name: Upload file game đã biên dịch
+        uses: actions/upload-artifact@v4.3.1
+        with:
+          name: Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
+          path: build/${{ matrix.targetPlatform }}
+      - name: Xóa cache trước đó
+        if: ${{ steps.cache-restore.outputs.cache-hit }}
+        continue-on-error: true
+        run: |
+          gh cache delete "Library-Linux" --repo ${{ github.repository }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Lưu cache
+        uses: actions/cache/save@v4.0.2
+        with: 
+          path: GameProject/DragonBoy/Library
+          key: Library-Linux
+  build-Unity-Android:
+    name: Biên dịch Android trên máy chủ Linux
+    needs: [check-new-commit]
+    if: needs.check-new-commit.outputs.cancel == 'false' && github.event.inputs.build-Unity-Android == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        targetPlatform:
+          - Android
+        scriptingBackend: ${{ github.event.inputs.mono-scripting-backend == 'true' && github.event.inputs.il2cpp-scripting-backend == 'true' && 'Mono2x,IL2CPP' || github.event.inputs.mono-scripting-backend == 'true' && 'Mono2x' || github.event.inputs.il2cpp-scripting-backend == 'true' && 'IL2CPP' }}
+    permissions:
+      actions: write
+    steps: 
+      - name: Clone pk9r327/Dragonboy branch Unity-project
+        uses: actions/checkout@v4.1.1
+        with:
+          repository: pk9r327/Dragonboy
+          ref: Unity-project
+      - name: Cache
+        if: ${{ matrix.scriptingBackend == 'Mono' }}
+        uses: actions/cache@v4.0.2
+        id: cache-restore
+        with:
+          path: GameProject/DragonBoy/Library
+          key: Library-Linux
+      - name: Cache (IL2CPP)
+        if: ${{ matrix.scriptingBackend == 'IL2CPP' }}
+        uses: actions/cache@v4.0.2
+        id: cache-restore-il2cpp
+        with:
+          path: GameProject/DragonBoy/Library
+          key: Library-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
+      - name: Tải artifact Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
+        uses: dawidd6/action-download-artifact@v3.1.4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          workflow_search: false
+          workflow_conclusion: success
+          if_no_artifact_found: warn
+          allow_forks: false
+          name: Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
+          path: build/${{ matrix.targetPlatform }}
+      - name: Giải phóng bộ nhớ 
+        uses: jlumbroso/free-disk-space@v1.3.1
+      - name: Biên dịch dự án
+        uses: game-ci/unity-builder@v4.2.3
+        # continue-on-error: true
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: ${{ matrix.targetPlatform }}
+          androidKeystoreName: DragonBoy-pk9r327-UnityProject.keystore # This file won't exist, but this property needs to exist.
+          androidKeystoreBase64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          androidKeystorePass: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+          androidKeyaliasName: ${{ secrets.ANDROID_KEYALIAS_NAME }}
+          androidKeyaliasPass: ${{ secrets.ANDROID_KEYALIAS_PASS }}
+          androidTargetSdkVersion: AndroidApiLevel29
+          projectPath: GameProject/DragonBoy
+          buildName: DragonBoy CommunityMod
+          versioning: Custom
+          version: 0.0.1
+          buildMethod: UnityBuilderAction.BuildScript.Build
+          customParameters: -scriptingBackend ${{ matrix.scriptingBackend }}
+      - name: Upload file game đã biên dịch
+        uses: actions/upload-artifact@v4.3.1
+        with:
+          name: Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
+          path: build/${{ matrix.targetPlatform }}
+      - name: Xóa cache trước đó
+        if: ${{ steps.cache-restore.outputs.cache-hit }}
+        continue-on-error: true
+        run: |
+          gh cache delete "Library-Linux" --repo ${{ github.repository }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Xóa cache trước đó (IL2CPP)
+        if: ${{ steps.cache-restore-il2cpp.outputs.cache-hit }}
+        continue-on-error: true
+        run: |
+          gh cache delete "Library-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}" --repo ${{ github.repository }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Lưu cache
+        if: ${{ matrix.scriptingBackend == 'Mono' }}
+        uses: actions/cache/save@v4.0.2
+        with: 
+          path: GameProject/DragonBoy/Library
+          key: Library-Linux
+      - name: Lưu cache (IL2CPP)
+        if: ${{ matrix.scriptingBackend == 'IL2CPP' }}
+        uses: actions/cache/save@v4.0.2
+        with: 
+          path: GameProject/DragonBoy/Library
+          key: Library-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
+  send-artifact-links-announcement:
+    name: Gửi link artifact tới Discord webhook
+    needs: [build-Unity-Windows, build-Unity-Linux, build-Unity-Android, build-Account-Manager]
+    if: ${{ always() && (needs.build-Unity-Windows.result != 'cancelled' && needs.build-Unity-Linux.result != 'cancelled' && needs.build-Unity-Android.result != 'cancelled' && needs.build-Account-Manager.result != 'cancelled') && (needs.build-Unity-Windows.result != 'skipped' && needs.build-Unity-Linux.result != 'skipped' && needs.build-Unity-Android.result != 'skipped' && needs.build-Account-Manager.result != 'skipped') }} && github.event.inputs.send-artifact-links-announcement == 'true'
+    runs-on: windows-latest
+    steps:
+      - name: Tạo thông báo để gửi tới Discord webhook
+        run: |
+          $artifactsAPIUrl = (Invoke-RestMethod -Uri "https://api.github.com/repos/${{ github.repository }}/actions/workflows/build.yml/runs?per_page=1" -Headers @{Authorization = "Bearer ${{ secrets.GITHUB_TOKEN }}"}).workflow_runs[0].artifacts_url
+          $artifacts = (Invoke-RestMethod -Uri $artifactsAPIUrl -Headers @{Authorization = "Bearer ${{ secrets.GITHUB_TOKEN }}"}).artifacts
+          $buildAccountManager="${{ needs.build-Account-Manager.result }}";
+          $buildUnityLinux="${{ needs.build-Unity-Linux.result }}";
+          $buildUnityWindows="${{ needs.build-Unity-Windows.result }}";
+          $buildUnityAndroid="${{ needs.build-Unity-Android.result }}";
+          $failure_count = 0;
+          if ($buildAccountManager -eq "failure") {$failure_count++} if ($buildUnityLinux -eq "failure") {$failure_count++} if ($buildUnityWindows -eq "failure") {$failure_count++} if ($buildUnityAndroid -eq "failure") {$failure_count++}
+          if ($failure_count -eq 4) {$color = 0xff0000} elseif ($failure_count -eq 3) {$color = 0xff5a00} elseif ($failure_count -eq 2)  {$color = 0xffa500} elseif ($failure_count -eq 1) {$color = 0xffff00} else {$color = 0x00ff00}
+          $output = "Kết quả:
+          - Biên dịch QLTK: **${buildAccountManager}**
+          - Biên dịch Game cho HĐH Windows: **${buildUnityWindows}**
+          - Biên dịch Game cho HĐH Linux: **${buildUnityLinux}**
+          - Biên dịch Game cho HĐH Android: **${buildUnityAndroid}**"
+          if ($artifacts.Count -gt 1) {$output += "`r`n$($artifacts.Count) Artifact:"}
+          for ($i = 0; $i -le $artifacts.Count - 1; $i++) {
+              $output += "`r`n$i. [$($artifacts[$i].name)](${{ github.event.repository.html_url }}/actions/runs/$($artifacts[$i].workflow_run.id)/artifacts/$($artifacts[$i].id))"
+          }
+          $payload = [PSCustomObject]@{
+              username = "GitHub Actions Webhook"
+              embeds = @(
+                  @{
+                      title = "${{ github.event.repository.name }}"
+                      url = "${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}"
+                      description = $output
+                      color = $color
+                      timestamp = (Get-Date).ToString("yyyy-MM-ddTHH:mm:ssZ")
+                  }
+              )
+          }
+          Invoke-RestMethod -Uri ${{ secrets.DISCORD_WEBHOOK }} -Method Post -Body (ConvertTo-Json $payload) -ContentType "application/json"
