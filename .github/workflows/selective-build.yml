@@ -1,4 +1,4 @@
-name: Biên dịch QLTK và Game
+name: Biên dịch QLTK và Game (selective)
 on:
   workflow_dispatch:
     inputs:
