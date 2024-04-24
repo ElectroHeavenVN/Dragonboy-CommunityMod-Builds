@@ -263,7 +263,7 @@ jobs:
           repository: pk9r327/Dragonboy
           ref: Unity-project
       - name: Cache
-        if: ${{ matrix.scriptingBackend == 'Mono' }}
+        if: ${{ matrix.scriptingBackend == 'Mono2x' }}
         uses: actions/cache@v4.0.2
         id: cache-restore
         with:
@@ -329,7 +329,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Lưu cache
-        if: ${{ matrix.scriptingBackend == 'Mono' }}
+        if: ${{ matrix.scriptingBackend == 'Mono2x' }}
         uses: actions/cache/save@v4.0.2
         with: 
           path: GameProject/DragonBoy/Library
