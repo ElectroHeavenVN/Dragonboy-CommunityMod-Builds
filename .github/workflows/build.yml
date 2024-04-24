@@ -343,7 +343,7 @@ jobs:
   send-artifact-links-announcement:
     name: Gửi link artifact tới Discord webhook
     needs: [build-Unity-Windows, build-Unity-Linux, build-Unity-Android, build-Account-Manager]
-    if: ${{ always() && (needs.build-Unity-Windows.result != 'cancelled' && needs.build-Unity-Linux.result != 'cancelled' && needs.build-Unity-Android.result != 'cancelled' && needs.build-Account-Manager.result != 'cancelled') && (needs.build-Unity-Windows.result != 'skipped' && needs.build-Unity-Linux.result != 'skipped' && needs.build-Unity-Android.result != 'skipped' && needs.build-Account-Manager.result != 'skipped') }}
+    if: ${{ !cancelled() && (needs.build-Unity-Windows.result != 'cancelled' && needs.build-Unity-Linux.result != 'cancelled' && needs.build-Unity-Android.result != 'cancelled' && needs.build-Account-Manager.result != 'cancelled') && (needs.build-Unity-Windows.result != 'skipped' && needs.build-Unity-Linux.result != 'skipped' && needs.build-Unity-Android.result != 'skipped' && needs.build-Account-Manager.result != 'skipped') }}
     runs-on: windows-latest
     steps:
       - name: Tạo thông báo để gửi tới Discord webhook
