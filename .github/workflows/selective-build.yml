@@ -3,42 +3,42 @@ on:
   workflow_dispatch:
     inputs:
       mono-scripting-backend:
-        description: 'Build Mono?'
+        description: 'Build Mono'
         type: boolean
         required: true
         default: true
       il2cpp-scripting-backend:
-        description: 'Build IL2CPP?'
+        description: 'Build IL2CPP'
         type: boolean
         required: true
         default: true
       check-new-commit:
-        description: 'Kiểm tra commit mới?'
+        description: 'Kiểm tra commit mới'
         type: boolean
         required: true
         default: true
       build-Account-Manager:
-        description: 'Biên dịch QLTK?'
+        description: 'Biên dịch QLTK'
         type: boolean
         required: true
         default: true
       build-Unity-Windows:
-        description: 'Biên dịch Game cho HĐH Windows?'
+        description: 'Biên dịch Game cho HĐH Windows'
         type: boolean
         required: true
         default: true
       build-Unity-Linux:
-        description: 'Biên dịch Game cho HĐH Linux?'
+        description: 'Biên dịch Game cho HĐH Linux'
         type: boolean
         required: true
         default: true
       build-Unity-Android:
-        description: 'Biên dịch Game cho HĐH Android?'
+        description: 'Biên dịch Game cho HĐH Android'
         type: boolean
         required: true
         default: true
       send-artifact-links-announcement:
-        description: 'Gửi link artifact tới Discord webhook?'
+        description: 'Gửi link artifact tới Discord webhook'
         type: boolean
         required: true
         default: true
