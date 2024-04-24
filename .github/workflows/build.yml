@@ -89,8 +89,9 @@ jobs:
         targetPlatform:
           - StandaloneWindows 
           - StandaloneWindows64 
+          - StandaloneWindowsArm64
         scriptingBackend:
-          - Mono # 0
+          - Mono2x # 0
           - IL2CPP # 1
     permissions:
       actions: write
@@ -116,9 +117,8 @@ jobs:
           allow_forks: false
           name: Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
           path: build/${{ matrix.targetPlatform }}
-      - name: Đổi scripting backend thành ${{ matrix.scriptingBackend }}
-        run: cd GameProject && pwsh ./set_scripting_backend.ps1 -projectSettingsPath "DragonBoy/ProjectSettings/ProjectSettings.asset" -platform ${{ matrix.targetPlatform }} -scriptingBackend ${{ matrix.scriptingBackend }} || powershell ./set_scripting_backend.ps1 -projectSettingsPath "DragonBoy/ProjectSettings/ProjectSettings.asset" -platform ${{ matrix.targetPlatform }} -scriptingBackend ${{ matrix.scriptingBackend }};     
       - name: Biên dịch dự án
+        if: ${{ matrix.targetPlatform != 'StandaloneWindowsArm64' }}
         uses: game-ci/unity-builder@v4.2.3
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
@@ -128,14 +128,37 @@ jobs:
           targetPlatform: ${{ matrix.targetPlatform }}
           projectPath: GameProject/DragonBoy
           buildName: DragonBoy CommunityMod
-          allowDirtyBuild: true
           versioning: Custom
           version: 0.0.1
+          buildMethod: UnityBuilderAction.BuildScript.Build
+          customParameters: -scriptingBackend ${{ matrix.scriptingBackend }}
+      - name: Biên dịch dự án (Arm64)
+        if: ${{ matrix.targetPlatform == 'StandaloneWindowsArm64' }}
+        uses: game-ci/unity-builder@v4.2.3
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: StandaloneWindows64
+          projectPath: GameProject/DragonBoy
+          buildName: DragonBoy CommunityMod
+          versioning: Custom
+          version: 0.0.1
+          buildMethod: UnityBuilderAction.BuildScript.Build
+          customParameters: -scriptingBackend ${{ matrix.scriptingBackend }} -architecture ARM64
       - name: Upload file game đã biên dịch
+        if: ${{ matrix.targetPlatform != 'StandaloneWindowsArm64' }}
         uses: actions/upload-artifact@v4.3.1
         with:
           name: Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
           path: build/${{ matrix.targetPlatform }}
+      - name: Upload file game đã biên dịch (Arm64)
+        if: ${{ matrix.targetPlatform == 'StandaloneWindowsArm64' }}
+        uses: actions/upload-artifact@v4.3.1
+        with:
+          name: Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
+          path: build/StandaloneWindows64
       - name: Xóa cache trước đó
         if: ${{ steps.cache-restore.outputs.cache-hit }}
         continue-on-error: true
@@ -159,7 +182,7 @@ jobs:
         targetPlatform:
           - StandaloneLinux64
         scriptingBackend:
-          - Mono # 0
+          - Mono2x # 0
           - IL2CPP # 1 
     permissions:
       actions: write
@@ -185,8 +208,6 @@ jobs:
           allow_forks: false
           name: Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
           path: build/${{ matrix.targetPlatform }}
-      - name: Đổi scripting backend thành ${{ matrix.scriptingBackend }}
-        run: cd GameProject && chmod +x set_scripting_backend.sh && ./set_scripting_backend.sh "DragonBoy/ProjectSettings/ProjectSettings.asset" "${{ matrix.targetPlatform }}" "${{ matrix.scriptingBackend }}"
       - name: Giải phóng bộ nhớ
         uses: jlumbroso/free-disk-space@v1.3.1
       - name: Biên dịch dự án
@@ -199,9 +220,10 @@ jobs:
           targetPlatform: ${{ matrix.targetPlatform }}
           projectPath: GameProject/DragonBoy
           buildName: DragonBoy CommunityMod
-          allowDirtyBuild: true
           versioning: Custom
           version: 0.0.1
+          buildMethod: UnityBuilderAction.BuildScript.Build
+          customParameters: -scriptingBackend ${{ matrix.scriptingBackend }}
       - name: Upload file game đã biên dịch
         uses: actions/upload-artifact@v4.3.1
         with:
@@ -230,7 +252,7 @@ jobs:
         targetPlatform:
           - Android
         scriptingBackend:
-          - Mono # 0
+          - Mono2x # 0
           - IL2CPP # 1 
     permissions:
       actions: write
@@ -264,9 +286,7 @@ jobs:
           allow_forks: false
           name: Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
           path: build/${{ matrix.targetPlatform }}
-      - name: Đổi scripting backend thành ${{ matrix.scriptingBackend }}
-        run: cd GameProject && chmod +x set_scripting_backend.sh && ./set_scripting_backend.sh "DragonBoy/ProjectSettings/ProjectSettings.asset" "${{ matrix.targetPlatform }}" "${{ matrix.scriptingBackend }}"
-      - name: Giải phóng bộ nhớ (Android build)
+      - name: Giải phóng bộ nhớ 
         uses: jlumbroso/free-disk-space@v1.3.1
       - name: Biên dịch dự án
         uses: game-ci/unity-builder@v4.2.3
@@ -285,9 +305,10 @@ jobs:
           androidTargetSdkVersion: AndroidApiLevel29
           projectPath: GameProject/DragonBoy
           buildName: DragonBoy CommunityMod
-          allowDirtyBuild: true
           versioning: Custom
           version: 0.0.1
+          buildMethod: UnityBuilderAction.BuildScript.Build
+          customParameters: -scriptingBackend ${{ matrix.scriptingBackend }}
       - name: Upload file game đã biên dịch
         uses: actions/upload-artifact@v4.3.1
         with:
