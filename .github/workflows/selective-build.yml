@@ -130,7 +130,7 @@ jobs:
           - StandaloneWindows 
           - StandaloneWindows64 
           - StandaloneWindowsArm64
-        scriptingBackend: ${{ github.event.inputs.mono-scripting-backend == 'true' && github.event.inputs.il2cpp-scripting-backend == 'true' && '[Mono2x, IL2CPP]' || github.event.inputs.mono-scripting-backend == 'true' && '[Mono2x]' || github.event.inputs.il2cpp-scripting-backend == 'true' && '[IL2CPP]' }}
+        scriptingBackend: ${{ github.event.inputs.mono-scripting-backend == 'true' && github.event.inputs.il2cpp-scripting-backend == 'true' && '["Mono2x", "IL2CPP"]' || github.event.inputs.mono-scripting-backend == 'true' && '["Mono2x"]' || github.event.inputs.il2cpp-scripting-backend == 'true' && '["IL2CPP"]' }}
     permissions:
       actions: write
     steps:
@@ -219,7 +219,7 @@ jobs:
       matrix:
         targetPlatform:
           - StandaloneLinux64
-        scriptingBackend: ${{ github.event.inputs.mono-scripting-backend == 'true' && github.event.inputs.il2cpp-scripting-backend == 'true' && '[Mono2x, IL2CPP]' || github.event.inputs.mono-scripting-backend == 'true' && '[Mono2x]' || github.event.inputs.il2cpp-scripting-backend == 'true' && '[IL2CPP]' }}
+        scriptingBackend: ${{ github.event.inputs.mono-scripting-backend == 'true' && github.event.inputs.il2cpp-scripting-backend == 'true' && '["Mono2x", "IL2CPP"]' || github.event.inputs.mono-scripting-backend == 'true' && '["Mono2x"]' || github.event.inputs.il2cpp-scripting-backend == 'true' && '["IL2CPP"]' }}
     permissions:
       actions: write
     steps: 
@@ -287,7 +287,7 @@ jobs:
       matrix:
         targetPlatform:
           - Android
-        scriptingBackend: ${{ github.event.inputs.mono-scripting-backend == 'true' && github.event.inputs.il2cpp-scripting-backend == 'true' && '[Mono2x, IL2CPP]' || github.event.inputs.mono-scripting-backend == 'true' && '[Mono2x]' || github.event.inputs.il2cpp-scripting-backend == 'true' && '[IL2CPP]' }}
+        scriptingBackend: ${{ github.event.inputs.mono-scripting-backend == 'true' && github.event.inputs.il2cpp-scripting-backend == 'true' && '["Mono2x", "IL2CPP"]' || github.event.inputs.mono-scripting-backend == 'true' && '["Mono2x"]' || github.event.inputs.il2cpp-scripting-backend == 'true' && '["IL2CPP"]' }}
     permissions:
       actions: write
     steps: 
