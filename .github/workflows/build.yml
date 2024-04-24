@@ -4,7 +4,7 @@ on:
     - cron: "0 0 * * *"
   workflow_dispatch:
 jobs:
-  check-commit:
+  check-new-commit:
     name: Kiểm tra commit mới
     runs-on: windows-latest
     outputs:
@@ -47,8 +47,8 @@ jobs:
           key: ${{ env.cache-key }}
   build-Account-Manager:
     name: Biên dịch QLTK
-    needs: [check-commit]
-    if: needs.check-commit.outputs.cancel == 'false'
+    needs: [check-new-commit]
+    if: needs.check-new-commit.outputs.cancel == 'false'
     strategy:
       matrix:
         configuration: [Debug, Release]
@@ -80,8 +80,8 @@ jobs:
         path: QLTK/bin/${{ matrix.configuration }}
   build-Unity-Windows:
     name: Biên dịch StandaloneWindows trên máy chủ Windows
-    needs: [check-commit]
-    if: needs.check-commit.outputs.cancel == 'false'
+    needs: [check-new-commit]
+    if: needs.check-new-commit.outputs.cancel == 'false'
     runs-on: windows-latest
     strategy:
       fail-fast: false
@@ -173,8 +173,8 @@ jobs:
           key: Library-Windows
   build-Unity-Linux:
     name: Biên dịch StandaloneLinux64 trên máy chủ Linux
-    needs: [check-commit]
-    if: needs.check-commit.outputs.cancel == 'false'
+    needs: [check-new-commit]
+    if: needs.check-new-commit.outputs.cancel == 'false'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -243,8 +243,8 @@ jobs:
           key: Library-Linux
   build-Unity-Android:
     name: Biên dịch Android trên máy chủ Linux
-    needs: [check-commit]
-    if: needs.check-commit.outputs.cancel == 'false'
+    needs: [check-new-commit]
+    if: needs.check-new-commit.outputs.cancel == 'false'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
