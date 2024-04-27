@@ -262,6 +262,8 @@ jobs:
         with:
           repository: pk9r327/Dragonboy
           ref: Unity-project
+      - name: Giải phóng bộ nhớ 
+        uses: jlumbroso/free-disk-space@v1.3.1
       - name: Cache
         if: ${{ matrix.scriptingBackend == 'Mono2x' }}
         uses: actions/cache@v4.0.2
@@ -286,8 +288,6 @@ jobs:
           allow_forks: false
           name: Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
           path: build/${{ matrix.targetPlatform }}
-      - name: Giải phóng bộ nhớ 
-        uses: jlumbroso/free-disk-space@v1.3.1
       - name: Biên dịch dự án
         uses: game-ci/unity-builder@v4.2.3
         # continue-on-error: true
