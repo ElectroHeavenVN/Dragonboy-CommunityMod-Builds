@@ -383,7 +383,7 @@ jobs:
     name: Phát hành artiact mới nhất
     runs-on: ubuntu-latest
     needs: [build-Unity-Windows, build-Unity-Linux, build-Unity-Android, build-Account-Manager]
-    if: ${{ !cancelled() && (needs.build-Unity-Windows.result != 'cancelled' && needs.build-Unity-Linux.result != 'cancelled' && needs.build-Unity-Android.result != 'cancelled' && needs.build-Account-Manager.result != 'cancelled') && (needs.build-Unity-Windows.result != 'skipped' && needs.build-Unity-Linux.result != 'skipped' && needs.build-Unity-Android.result != 'skipped' && needs.build-Account-Manager.result != 'skipped') && github.event.inputs.release-artifacts == 'true' }}
+    if: ${{ !cancelled() && (needs.build-Unity-Windows.result != 'cancelled' && needs.build-Unity-Linux.result != 'cancelled' && needs.build-Unity-Android.result != 'cancelled' && needs.build-Account-Manager.result != 'cancelled') && github.event.inputs.release-artifacts == 'true' }}
     permissions:
       contents: write
     outputs:
@@ -417,7 +417,7 @@ jobs:
   send-artifact-links-announcement:
     name: Gửi link artifact tới Discord webhook
     needs: [build-Unity-Windows, build-Unity-Linux, build-Unity-Android, build-Account-Manager, release-latest-artifacts]
-    if: ${{ !cancelled() && (needs.build-Unity-Windows.result != 'cancelled' && needs.build-Unity-Linux.result != 'cancelled' && needs.build-Unity-Android.result != 'cancelled' && needs.build-Account-Manager.result != 'cancelled' && needs.release-latest-artifacts.result != 'cancelled') && (needs.build-Unity-Windows.result != 'skipped' && needs.build-Unity-Linux.result != 'skipped' && needs.build-Unity-Android.result != 'skipped' && needs.build-Account-Manager.result != 'skipped' && needs.release-latest-artifacts.result != 'skipped') && github.event.inputs.send-artifact-links-announcement == 'true' }}
+    if: ${{ !cancelled() && (needs.build-Unity-Windows.result != 'cancelled' && needs.build-Unity-Linux.result != 'cancelled' && needs.build-Unity-Android.result != 'cancelled' && needs.build-Account-Manager.result != 'cancelled' && needs.release-latest-artifacts.result != 'cancelled') && github.event.inputs.send-artifact-links-announcement == 'true' }}
     runs-on: windows-latest
     steps:
       - name: Tạo thông báo để gửi tới Discord webhook
