@@ -50,7 +50,8 @@ on:
       discord-webhook:
         description: 'Webhook Discord'
         type: string
-        required: true
+        required: false
+        default: ""
 jobs:
   check-new-commit:
     name: Kiểm tra commit mới
