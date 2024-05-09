@@ -1,0 +1,35 @@
+name: Release Latest Artifacts
+
+on: workflow_dispatch
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      
+      - name: Tải artifact mới nhất
+        uses: dawidd6/action-download-artifact@v3.1.4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          workflow: build.yml
+          workflow_conclusion: success
+          if_no_artifact_found: warn
+          allow_forks: false
+          skip_unpack: true
+          path: build
+
+      - run: |
+          echo 'artifacts<<EOF' >> $GITHUB_ENV
+          cd build && ls -1 >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
+      
+      - name: Phát hành artifact
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ env.artifacts }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          name: Latest build
+          draft: false
+          prerelease: false
