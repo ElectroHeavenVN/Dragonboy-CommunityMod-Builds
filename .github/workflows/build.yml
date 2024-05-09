@@ -17,7 +17,7 @@ jobs:
       actions: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4
       - name: Lấy hash commit mới nhất của branch Unity-project
         run: |
           $commit = git ls-remote https://github.com/pk9r327/Dragonboy.git Unity-project
@@ -25,7 +25,7 @@ jobs:
           echo "LATEST_COMMIT=$hash" | Out-File -FilePath $env:GITHUB_ENV -Append
       - name: Cache hash commit
         id: cache-restore
-        uses: actions/cache/restore@v4.0.2
+        uses: actions/cache/restore@v4
         with:
           path: latest-commit.txt
           key: ${{ env.cache-key }}
@@ -41,7 +41,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Lưu cache mới
-        uses: actions/cache/save@v4.0.2
+        uses: actions/cache/save@v4
         with: 
           path: latest-commit.txt
           key: ${{ env.cache-key }}
@@ -57,7 +57,7 @@ jobs:
       Solution-Path: QLTK\QLTK.sln
     steps:
     - name: Clone pk9r327/Dragonboy branch Unity-project
-      uses: actions/checkout@v4.1.1
+      uses: actions/checkout@v4
       with:
         repository: pk9r327/Dragonboy
         ref: Unity-project
@@ -74,7 +74,7 @@ jobs:
       env:
         Configuration: ${{ matrix.configuration }}
     - name: Upload file đã biên dịch
-      uses: actions/upload-artifact@v4.3.1
+      uses: actions/upload-artifact@v4
       with:
         name: QLTK-${{ matrix.configuration }}
         path: QLTK/bin/${{ matrix.configuration }}
@@ -97,18 +97,18 @@ jobs:
       actions: write
     steps:
       - name: Clone pk9r327/Dragonboy branch Unity-project
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4
         with:
           repository: pk9r327/Dragonboy
           ref: Unity-project
       - name: Cache
         id: cache-restore
-        uses: actions/cache@v4.0.2
+        uses: actions/cache@v4
         with:
           path: GameProject/DragonBoy/Library
           key: Library-Windows
       - name: Tải artifact Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
-        uses: dawidd6/action-download-artifact@v3.1.4
+        uses: dawidd6/action-download-artifact@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           workflow_search: false
@@ -119,7 +119,7 @@ jobs:
           path: build/${{ matrix.targetPlatform }}
       - name: Biên dịch dự án
         if: ${{ matrix.targetPlatform != 'StandaloneWindowsArm64' }}
-        uses: game-ci/unity-builder@v4.2.3
+        uses: game-ci/unity-builder@v4
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
@@ -134,7 +134,7 @@ jobs:
           customParameters: -scriptingBackend ${{ matrix.scriptingBackend }}
       - name: Biên dịch dự án (Arm64)
         if: ${{ matrix.targetPlatform == 'StandaloneWindowsArm64' }}
-        uses: game-ci/unity-builder@v4.2.3
+        uses: game-ci/unity-builder@v4
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
@@ -149,13 +149,13 @@ jobs:
           customParameters: -scriptingBackend ${{ matrix.scriptingBackend }} -architecture ARM64
       - name: Upload file game đã biên dịch
         if: ${{ matrix.targetPlatform != 'StandaloneWindowsArm64' }}
-        uses: actions/upload-artifact@v4.3.1
+        uses: actions/upload-artifact@v4
         with:
           name: Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
           path: build/${{ matrix.targetPlatform }}
       - name: Upload file game đã biên dịch (Arm64)
         if: ${{ matrix.targetPlatform == 'StandaloneWindowsArm64' }}
-        uses: actions/upload-artifact@v4.3.1
+        uses: actions/upload-artifact@v4
         with:
           name: Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
           path: build/StandaloneWindows64
@@ -167,7 +167,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Lưu cache
-        uses: actions/cache/save@v4.0.2
+        uses: actions/cache/save@v4
         with: 
           path: GameProject/DragonBoy/Library
           key: Library-Windows
@@ -188,18 +188,18 @@ jobs:
       actions: write
     steps: 
       - name: Clone pk9r327/Dragonboy branch Unity-project
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4
         with:
           repository: pk9r327/Dragonboy
           ref: Unity-project
       - name: Cache
-        uses: actions/cache@v4.0.2
+        uses: actions/cache@v4
         id: cache-restore
         with:
           path: GameProject/DragonBoy/Library
           key: Library-Linux
       - name: Tải artifact Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
-        uses: dawidd6/action-download-artifact@v3.1.4
+        uses: dawidd6/action-download-artifact@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           workflow_search: false
@@ -211,7 +211,7 @@ jobs:
       - name: Giải phóng bộ nhớ
         uses: jlumbroso/free-disk-space@v1.3.1
       - name: Biên dịch dự án
-        uses: game-ci/unity-builder@v4.2.3
+        uses: game-ci/unity-builder@v4
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
@@ -225,7 +225,7 @@ jobs:
           buildMethod: UnityBuilderAction.BuildScript.Build
           customParameters: -scriptingBackend ${{ matrix.scriptingBackend }}
       - name: Upload file game đã biên dịch
-        uses: actions/upload-artifact@v4.3.1
+        uses: actions/upload-artifact@v4
         with:
           name: Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
           path: build/${{ matrix.targetPlatform }}
@@ -237,7 +237,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Lưu cache
-        uses: actions/cache/save@v4.0.2
+        uses: actions/cache/save@v4
         with: 
           path: GameProject/DragonBoy/Library
           key: Library-Linux
@@ -258,7 +258,7 @@ jobs:
       actions: write
     steps: 
       - name: Clone pk9r327/Dragonboy branch Unity-project
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4
         with:
           repository: pk9r327/Dragonboy
           ref: Unity-project
@@ -266,20 +266,20 @@ jobs:
         uses: jlumbroso/free-disk-space@v1.3.1
       - name: Cache
         if: ${{ matrix.scriptingBackend == 'Mono2x' }}
-        uses: actions/cache@v4.0.2
+        uses: actions/cache@v4
         id: cache-restore
         with:
           path: GameProject/DragonBoy/Library
           key: Library-Linux
       - name: Cache (IL2CPP)
         if: ${{ matrix.scriptingBackend == 'IL2CPP' }}
-        uses: actions/cache@v4.0.2
+        uses: actions/cache@v4
         id: cache-restore-il2cpp
         with:
           path: GameProject/DragonBoy/Library
           key: Library-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
       - name: Tải artifact Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
-        uses: dawidd6/action-download-artifact@v3.1.4
+        uses: dawidd6/action-download-artifact@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           workflow_search: false
@@ -289,7 +289,7 @@ jobs:
           name: Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
           path: build/${{ matrix.targetPlatform }}
       - name: Biên dịch dự án
-        uses: game-ci/unity-builder@v4.2.3
+        uses: game-ci/unity-builder@v4
         # continue-on-error: true
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
@@ -310,7 +310,7 @@ jobs:
           buildMethod: UnityBuilderAction.BuildScript.Build
           customParameters: -scriptingBackend ${{ matrix.scriptingBackend }}
       - name: Upload file game đã biên dịch
-        uses: actions/upload-artifact@v4.3.1
+        uses: actions/upload-artifact@v4
         with:
           name: Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
           path: build/${{ matrix.targetPlatform }}
@@ -330,13 +330,13 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Lưu cache
         if: ${{ matrix.scriptingBackend == 'Mono2x' }}
-        uses: actions/cache/save@v4.0.2
+        uses: actions/cache/save@v4
         with: 
           path: GameProject/DragonBoy/Library
           key: Library-Linux
       - name: Lưu cache (IL2CPP)
         if: ${{ matrix.scriptingBackend == 'IL2CPP' }}
-        uses: actions/cache/save@v4.0.2
+        uses: actions/cache/save@v4
         with: 
           path: GameProject/DragonBoy/Library
           key: Library-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
