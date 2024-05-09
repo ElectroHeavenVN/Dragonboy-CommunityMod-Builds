@@ -25,6 +25,7 @@ jobs:
           ls -1 | xargs realpath >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
       - name: Phát hành artifact
+        id: release
         uses: softprops/action-gh-release@v2
         with:
           files: ${{ env.artifacts }}
@@ -33,3 +34,8 @@ jobs:
           draft: false
           prerelease: false
           tag_name: latest
+      - run: |
+          echo ${{ steps.release.outputs.url }}
+          echo ${{ steps.release.outputs.id }}
+          echo ${{ steps.release.outputs.upload_url }}
+          echo ${{ steps.release.outputs.assets }}
