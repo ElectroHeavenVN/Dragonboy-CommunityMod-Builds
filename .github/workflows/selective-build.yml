@@ -47,6 +47,10 @@ on:
         type: boolean
         required: true
         default: false
+      discord-webhook:
+        description: 'Webhook Discord'
+        type: string
+        required: true
 jobs:
   check-new-commit:
     name: Kiểm tra commit mới
@@ -455,4 +459,4 @@ jobs:
                   }
               )
           }
-          Invoke-RestMethod -Uri ${{ secrets.DISCORD_WEBHOOK }} -Method Post -Body (ConvertTo-Json $payload) -ContentType "application/json"
+          Invoke-RestMethod -Uri ${{ github.event.inputs.discord-webhook }} -Method Post -Body (ConvertTo-Json $payload) -ContentType "application/json"
