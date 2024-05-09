@@ -1,14 +1,9 @@
-name: Release Latest Artifacts
-
+name: Phát hành artiact mới nhất
 on: workflow_dispatch
-
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
       - name: Tải artifact mới nhất
         uses: dawidd6/action-download-artifact@v3
         with:
@@ -19,12 +14,11 @@ jobs:
           allow_forks: false
           skip_unpack: true
           path: build
-
-      - run: |
+      - name: Lấy danh sách artifact
+        run: |
           echo 'artifacts<<EOF' >> $GITHUB_ENV
           cd build && ls -1 >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
-      
       - name: Phát hành artifact
         uses: softprops/action-gh-release@v2
         with:
