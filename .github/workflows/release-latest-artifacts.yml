@@ -33,3 +33,4 @@ jobs:
           name: Latest build
           draft: false
           prerelease: false
+          tag_name: latest
