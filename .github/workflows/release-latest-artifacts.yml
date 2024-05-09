@@ -4,6 +4,8 @@ jobs:
   release-latest-artifacts:
     name: Phát hành artiact mới nhất
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Tải artifact mới nhất
         uses: dawidd6/action-download-artifact@v3
