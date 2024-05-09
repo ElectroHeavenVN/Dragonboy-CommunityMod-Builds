@@ -20,7 +20,9 @@ jobs:
       - name: Lấy danh sách artifact
         run: |
           echo 'artifacts<<EOF' >> $GITHUB_ENV
-          cd build && ls -1 >> $GITHUB_ENV
+          cd build
+          ls -1 | xargs realpath
+          ls -1 | xargs realpath >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
       - name: Phát hành artifact
         uses: softprops/action-gh-release@v2
