@@ -1,7 +1,8 @@
 name: Phát hành artiact mới nhất
 on: workflow_dispatch
 jobs:
-  release:
+  release-latest-artifacts:
+    name: Phát hành artiact mới nhất
     runs-on: ubuntu-latest
     steps:
       - name: Tải artifact mới nhất
