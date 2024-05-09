@@ -16,12 +16,12 @@ on:
         description: 'Kiểm tra commit mới'
         type: boolean
         required: true
-        default: true
+        default: false
       build-Account-Manager:
         description: 'Biên dịch QLTK'
         type: boolean
         required: true
-        default: true
+        default: false
       build-Unity-Windows:
         description: 'Biên dịch Game cho HĐH Windows'
         type: boolean
@@ -37,11 +37,16 @@ on:
         type: boolean
         required: true
         default: true
+      release-artifacts:
+        description: 'Tạo release từ artifact mới nhất'
+        type: boolean
+        required: true
+        default: true
       send-artifact-links-announcement:
         description: 'Gửi link artifact tới Discord webhook'
         type: boolean
         required: true
-        default: true
+        default: false
 jobs:
   check-new-commit:
     name: Kiểm tra commit mới
@@ -374,10 +379,45 @@ jobs:
         with: 
           path: GameProject/DragonBoy/Library
           key: Library-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
+  release-latest-artifacts:
+    name: Phát hành artiact mới nhất
+    runs-on: ubuntu-latest
+    needs: [build-Unity-Windows, build-Unity-Linux, build-Unity-Android, build-Account-Manager]
+    if: ${{ !cancelled() && (needs.build-Unity-Windows.result != 'cancelled' && needs.build-Unity-Linux.result != 'cancelled' && needs.build-Unity-Android.result != 'cancelled' && needs.build-Account-Manager.result != 'cancelled') && (needs.build-Unity-Windows.result != 'skipped' && needs.build-Unity-Linux.result != 'skipped' && needs.build-Unity-Android.result != 'skipped' && needs.build-Account-Manager.result != 'skipped') && github.event.inputs.release-artifacts == 'true' }}
+    permissions:
+      contents: write
+    outputs:
+      release-url: ${{ steps.release-artifacts.outputs.url }}
+    steps:
+      - name: Tải artifact mới nhất
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          workflow_conclusion: success
+          if_no_artifact_found: warn
+          allow_forks: false
+          skip_unpack: true
+          path: artifacts
+      - name: Lấy danh sách artifact
+        run: |
+          echo 'artifacts<<EOF' >> $GITHUB_ENV
+          cd artifacts
+          ls -1 | xargs realpath >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
+      - name: Phát hành artifact
+        id: release-artifacts
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ env.artifacts }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          name: Latest build
+          draft: false
+          prerelease: false
+          tag_name: latest
   send-artifact-links-announcement:
     name: Gửi link artifact tới Discord webhook
-    needs: [build-Unity-Windows, build-Unity-Linux, build-Unity-Android, build-Account-Manager]
-    if: ${{ !cancelled() && (needs.build-Unity-Windows.result != 'cancelled' && needs.build-Unity-Linux.result != 'cancelled' && needs.build-Unity-Android.result != 'cancelled' && needs.build-Account-Manager.result != 'cancelled') && (needs.build-Unity-Windows.result != 'skipped' && needs.build-Unity-Linux.result != 'skipped' && needs.build-Unity-Android.result != 'skipped' && needs.build-Account-Manager.result != 'skipped') && github.event.inputs.send-artifact-links-announcement == 'true' }}
+    needs: [build-Unity-Windows, build-Unity-Linux, build-Unity-Android, build-Account-Manager, release-latest-artifacts]
+    if: ${{ !cancelled() && (needs.build-Unity-Windows.result != 'cancelled' && needs.build-Unity-Linux.result != 'cancelled' && needs.build-Unity-Android.result != 'cancelled' && needs.build-Account-Manager.result != 'cancelled' && needs.release-latest-artifacts.result != 'cancelled') && (needs.build-Unity-Windows.result != 'skipped' && needs.build-Unity-Linux.result != 'skipped' && needs.build-Unity-Android.result != 'skipped' && needs.build-Account-Manager.result != 'skipped' && needs.release-latest-artifacts.result != 'skipped') && github.event.inputs.send-artifact-links-announcement == 'true' }}
     runs-on: windows-latest
     steps:
       - name: Tạo thông báo để gửi tới Discord webhook
@@ -396,9 +436,12 @@ jobs:
           - Biên dịch Game cho HĐH Windows: **${buildUnityWindows}**
           - Biên dịch Game cho HĐH Linux: **${buildUnityLinux}**
           - Biên dịch Game cho HĐH Android: **${buildUnityAndroid}**"
-          if ($artifacts.Count -gt 1) {$output += "`r`n$($artifacts.Count) Artifact:"}
+          if ($artifacts.Count -gt 1) {
+            $output += "`r`n[Link release mới nhất](${{ needs.release-latest-artifacts.outputs.release-url }})"
+            $output += "`r`n$($artifacts.Count) Artifact:"
+            }
           for ($i = 0; $i -le $artifacts.Count - 1; $i++) {
-              $output += "`r`n$i. [$($artifacts[$i].name)](${{ github.event.repository.html_url }}/actions/runs/$($artifacts[$i].workflow_run.id)/artifacts/$($artifacts[$i].id))"
+            $output += "`r`n$i. [$($artifacts[$i].name)](${{ github.event.repository.html_url }}/actions/runs/$($artifacts[$i].workflow_run.id)/artifacts/$($artifacts[$i].id))"
           }
           $payload = [PSCustomObject]@{
               username = "GitHub Actions Webhook"
