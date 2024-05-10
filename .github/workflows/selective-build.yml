@@ -137,9 +137,9 @@ jobs:
       fail-fast: false
       matrix:
         targetPlatform:
-          - StandaloneWindows 
-          - StandaloneWindows64 
-          - StandaloneWindowsArm64
+        - StandaloneWindowsX86
+        - StandaloneWindowsX86_64
+        - StandaloneWindowsArm64
         scriptingBackend: ${{ fromJson(github.event.inputs.mono-scripting-backend == 'true' && github.event.inputs.il2cpp-scripting-backend == 'true' && '["Mono2x", "IL2CPP"]' || github.event.inputs.mono-scripting-backend == 'true' && '["Mono2x"]' || github.event.inputs.il2cpp-scripting-backend == 'true' && '["IL2CPP"]') }}
     permissions:
       actions: write
@@ -197,7 +197,7 @@ jobs:
           path: GameProject/DragonBoy/Library
           key: Library-Windows
   build-Unity-Linux:
-    name: Biên dịch StandaloneLinux64 trên máy chủ Linux
+    name: Biên dịch StandaloneLinuxX86_64 trên máy chủ Linux
     needs: [check-new-commit]
     if: ${{ !cancelled() && needs.check-new-commit.outputs.cancel != 'true' && github.event.inputs.build-Unity-Linux == 'true' }}
     runs-on: ubuntu-latest
@@ -205,7 +205,7 @@ jobs:
       fail-fast: false
       matrix:
         targetPlatform:
-          - StandaloneLinux64
+          - StandaloneLinuxX86_64
         scriptingBackend: ${{ fromJson(github.event.inputs.mono-scripting-backend == 'true' && github.event.inputs.il2cpp-scripting-backend == 'true' && '["Mono2x", "IL2CPP"]' || github.event.inputs.mono-scripting-backend == 'true' && '["Mono2x"]' || github.event.inputs.il2cpp-scripting-backend == 'true' && '["IL2CPP"]') }}
     permissions:
       actions: write
