@@ -1,4 +1,4 @@
-# Dragonboy-CommunityMod-Builds - VI | [EN](../../README-EN.md)
+# Dragonboy-CommunityMod-Builds - VI | [EN](../../README_EN.md)
 Tự động checkout và biên dịch [Dragonboy](https://github.com/pk9r327/Dragonboy/tree/Unity-project) bằng GitHub Actions hàng ngày. Có thể chạy thủ công khi cần thiết.
 
 Các nền tảng được hỗ trợ: Windows, Linux, Android. Hệ điều hành iOS sẽ không được hỗ trợ do những giới hạn về thực thi mã động được tạo trong thời gian chạy.
