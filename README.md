@@ -38,3 +38,6 @@ Có 2 phương pháp để tải xuống:
     + (Tùy chọn) `DISCORD_WEBHOOK`: URL Webhook Discord để thông báo kết quả biên dịch
 
 Tham khảo phần [Deploy to Google Play](https://game.ci/docs/github/deployment/android/) của [GameCI](https://game.ci/) để biết thêm thông tin về phần keystore của Android.
+
+---
+#### Bạn có thắc mắc hay gặp phải vấn đề? Hãy cho tôi biết! Bạn có thể tạo issue tại đây hoặc yêu cầu trợ giúp trong [Server Discord](https://discord.gg/mYtgWabd33) của [pk9r327](https://github.com/pk9r327).

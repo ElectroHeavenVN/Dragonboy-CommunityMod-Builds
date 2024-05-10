@@ -38,3 +38,6 @@ To build the [Dragonboy](https://github.com/pk9r327/Dragonboy/tree/Unity-project
     + (Optional) `DISCORD_WEBHOOK`: Discord Webhook URL for build result notifications
 
 Refer to the [Deploy to Google Play](https://game.ci/docs/github/deployment/android/) section of [GameCI](https://game.ci/) for more information about Android keystore.
+
+---
+#### If you come across any issues, let me know! You can create an issue here or request help in [pk9r327](https://github.com/pk9r327)'s [Discord server](https://discord.gg/mYtgWabd33).
