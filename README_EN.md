@@ -1,4 +1,4 @@
-# Dragonboy-CommunityMod-Builds - [VI](../../README.md) | EN
+# Dragonboy-CommunityMod-Builds - [VI](README.md) | EN
 Automatically checkout and compile [Dragonboy](https://github.com/pk9r327/Dragonboy/tree/Unity-project) using GitHub Actions daily. Can be manually run when needed.
 
 Supported OS: Windows, Linux, Android. The iOS operating system will not be supported due to limitations on the execution of dynamically generated code.
