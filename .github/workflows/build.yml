@@ -124,13 +124,12 @@ jobs:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
-          targetPlatform: ${{ matrix.targetPlatform }}
           projectPath: GameProject/DragonBoy
           buildName: DragonBoy CommunityMod
           versioning: Custom
           version: 0.0.1
           buildMethod: UnityBuilderAction.BuildScript.Build
-          customParameters: -scriptingBackend ${{ matrix.scriptingBackend }}
+          customParameters: -scriptingBackend ${{ matrix.scriptingBackend }} -buildTarget ${{ matrix.targetPlatform }} -customBuildTargetName ${{ matrix.targetPlatform }}
       - name: Upload file game đã biên dịch
         uses: actions/upload-artifact@v4
         with:
@@ -194,13 +193,12 @@ jobs:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
-          targetPlatform: ${{ matrix.targetPlatform }}
           projectPath: GameProject/DragonBoy
           buildName: DragonBoy CommunityMod
           versioning: Custom
           version: 0.0.1
           buildMethod: UnityBuilderAction.BuildScript.Build
-          customParameters: -scriptingBackend ${{ matrix.scriptingBackend }}
+          customParameters: -scriptingBackend ${{ matrix.scriptingBackend }} -buildTarget ${{ matrix.targetPlatform }} -customBuildTargetName ${{ matrix.targetPlatform }}
       - name: Upload file game đã biên dịch
         uses: actions/upload-artifact@v4
         with:
