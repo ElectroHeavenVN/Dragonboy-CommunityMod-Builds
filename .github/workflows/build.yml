@@ -405,10 +405,10 @@ jobs:
           if (${buildUnityAndroid} -ne "skipped") {
             $output += "`r`n- Biên dịch Game cho HĐH Android: **${buildUnityAndroid}**";
           }
-          if ($artifacts.Count -gt 1) {
+          if ($artifacts.Count -gt 0) {
             $output += "`r`n[Link release mới nhất](${{ needs.release-latest-artifacts.outputs.release-url }})"
             $output += "`r`n$($artifacts.Count) Artifact:"
-            }
+          }
           for ($i = 0; $i -le $artifacts.Count - 1; $i++) {
             $output += "`r`n$i. [$($artifacts[$i].name)](${{ github.event.repository.html_url }}/actions/runs/$($artifacts[$i].workflow_run.id)/artifacts/$($artifacts[$i].id))"
           }
