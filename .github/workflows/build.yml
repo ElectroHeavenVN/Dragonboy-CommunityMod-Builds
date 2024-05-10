@@ -393,14 +393,18 @@ jobs:
           if ($buildAccountManager -eq "failure") {$failure_count++} if ($buildUnityLinux -eq "failure") {$failure_count++} if ($buildUnityWindows -eq "failure") {$failure_count++} if ($buildUnityAndroid -eq "failure") {$failure_count++}
           if ($failure_count -eq 4) {$color = 0xff0000} elseif ($failure_count -eq 3) {$color = 0xff5a00} elseif ($failure_count -eq 2)  {$color = 0xffa500} elseif ($failure_count -eq 1) {$color = 0xffff00} else {$color = 0x00ff00}
           $output = "Kết quả:";
-          if (${buildAccountManager} -ne "skipped") 
-          $output += "`r`n- Biên dịch QLTK: **${buildAccountManager}**";
-          if (${buildUnityWindows} -ne "skipped") 
+          if (${buildAccountManager} -ne "skipped") {
+            $output += "`r`n- Biên dịch QLTK: **${buildAccountManager}**";
+          }
+          if (${buildUnityWindows} -ne "skipped") {
             $output += "`r`n- Biên dịch Game cho HĐH Windows: **${buildUnityWindows}**";
-          if (${buildUnityLinux} -ne "skipped") 
+          }
+          if (${buildUnityLinux} -ne "skipped") {
             $output += "`r`n- Biên dịch Game cho HĐH Linux: **${buildUnityLinux}**";
-          if (${buildUnityAndroid} -ne "skipped")
+          }
+          if (${buildUnityAndroid} -ne "skipped") {
             $output += "`r`n- Biên dịch Game cho HĐH Android: **${buildUnityAndroid}**";
+          }
           if ($artifacts.Count -gt 1) {
             $output += "`r`n[Link release mới nhất](${{ needs.release-latest-artifacts.outputs.release-url }})"
             $output += "`r`n$($artifacts.Count) Artifact:"
