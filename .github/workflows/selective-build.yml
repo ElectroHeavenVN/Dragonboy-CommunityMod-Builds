@@ -137,9 +137,9 @@ jobs:
       fail-fast: false
       matrix:
         targetPlatform:
-        - StandaloneWindowsX86
-        - StandaloneWindowsX86_64
-        - StandaloneWindowsArm64
+          - StandaloneWindows 
+          - StandaloneWindows64 
+          - StandaloneWindowsArm64
         scriptingBackend: ${{ fromJson(github.event.inputs.mono-scripting-backend == 'true' && github.event.inputs.il2cpp-scripting-backend == 'true' && '["Mono2x", "IL2CPP"]' || github.event.inputs.mono-scripting-backend == 'true' && '["Mono2x"]' || github.event.inputs.il2cpp-scripting-backend == 'true' && '["IL2CPP"]') }}
     permissions:
       actions: write
@@ -164,25 +164,49 @@ jobs:
           if_no_artifact_found: warn
           allow_forks: false
           name: Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
-          path: build
+          path: build/${{ matrix.targetPlatform }}
       - name: Biên dịch dự án
+        if: ${{ matrix.targetPlatform != 'StandaloneWindowsArm64' }}
         uses: game-ci/unity-builder@v4
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
+          targetPlatform: ${{ matrix.targetPlatform }}
           projectPath: GameProject/DragonBoy
           buildName: DragonBoy CommunityMod
           versioning: Custom
           version: 0.0.1
           buildMethod: UnityBuilderAction.BuildScript.Build
-          customParameters: -scriptingBackend ${{ matrix.scriptingBackend }} -buildTarget ${{ matrix.targetPlatform }} -customBuildTarget ${{ matrix.targetPlatform }}
+          customParameters: -scriptingBackend ${{ matrix.scriptingBackend }}
+      - name: Biên dịch dự án (Arm64)
+        if: ${{ matrix.targetPlatform == 'StandaloneWindowsArm64' }}
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: StandaloneWindows64
+          projectPath: GameProject/DragonBoy
+          buildName: DragonBoy CommunityMod
+          versioning: Custom
+          version: 0.0.1
+          buildMethod: UnityBuilderAction.BuildScript.Build
+          customParameters: -scriptingBackend ${{ matrix.scriptingBackend }} -architecture ARM64
       - name: Upload file game đã biên dịch
+        if: ${{ matrix.targetPlatform != 'StandaloneWindowsArm64' }}
         uses: actions/upload-artifact@v4
         with:
           name: Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
-          path: build
+          path: build/${{ matrix.targetPlatform }}
+      - name: Upload file game đã biên dịch (Arm64)
+        if: ${{ matrix.targetPlatform == 'StandaloneWindowsArm64' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
+          path: build/StandaloneWindows64
       - name: Xóa cache trước đó
         if: ${{ steps.cache-restore.outputs.cache-hit }}
         continue-on-error: true
@@ -196,7 +220,7 @@ jobs:
           path: GameProject/DragonBoy/Library
           key: Library-Windows
   build-Unity-Linux:
-    name: Biên dịch StandaloneLinuxX86_64 trên máy chủ Linux
+    name: Biên dịch StandaloneLinux64 trên máy chủ Linux
     needs: [check-new-commit]
     if: ${{ !cancelled() && needs.check-new-commit.outputs.cancel != 'true' && github.event.inputs.build-Unity-Linux == 'true' }}
     runs-on: ubuntu-latest
@@ -204,7 +228,7 @@ jobs:
       fail-fast: false
       matrix:
         targetPlatform:
-          - StandaloneLinuxX86_64
+          - StandaloneLinux64
         scriptingBackend: ${{ fromJson(github.event.inputs.mono-scripting-backend == 'true' && github.event.inputs.il2cpp-scripting-backend == 'true' && '["Mono2x", "IL2CPP"]' || github.event.inputs.mono-scripting-backend == 'true' && '["Mono2x"]' || github.event.inputs.il2cpp-scripting-backend == 'true' && '["IL2CPP"]') }}
     permissions:
       actions: write
@@ -239,12 +263,13 @@ jobs:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
+          targetPlatform: ${{ matrix.targetPlatform }}
           projectPath: GameProject/DragonBoy
           buildName: DragonBoy CommunityMod
           versioning: Custom
           version: 0.0.1
           buildMethod: UnityBuilderAction.BuildScript.Build
-          customParameters: -scriptingBackend ${{ matrix.scriptingBackend }} -buildTarget ${{ matrix.targetPlatform }} -customBuildTarget ${{ matrix.targetPlatform }}
+          customParameters: -scriptingBackend ${{ matrix.scriptingBackend }}
       - name: Upload file game đã biên dịch
         uses: actions/upload-artifact@v4
         with:
@@ -425,9 +450,7 @@ jobs:
             $output += "`r`n- Biên dịch Game cho HĐH Android: **${buildUnityAndroid}**";
           }
           if ($artifacts.Count -gt 0) {
-            $output += "`r`n------------------------------------------------------";
-            $output += "`r`n### [Latest release](${{ needs.release-latest-artifacts.outputs.release-url }})"
-            $output += "`r`n------------------------------------------------------";
+            $output += "`r`n[Link release mới nhất](${{ needs.release-latest-artifacts.outputs.release-url }})"
             $output += "`r`n$($artifacts.Count) Artifact:"
           }
           for ($i = 0; $i -le $artifacts.Count - 1; $i++) {
