@@ -129,7 +129,7 @@ jobs:
           versioning: Custom
           version: 0.0.1
           buildMethod: UnityBuilderAction.BuildScript.Build
-          customParameters: -scriptingBackend ${{ matrix.scriptingBackend }} -buildTarget ${{ matrix.targetPlatform }} -customBuildTargetName ${{ matrix.targetPlatform }}
+          customParameters: -scriptingBackend ${{ matrix.scriptingBackend }} -buildTarget ${{ matrix.targetPlatform }}
       - name: Upload file game đã biên dịch
         uses: actions/upload-artifact@v4
         with:
@@ -198,7 +198,7 @@ jobs:
           versioning: Custom
           version: 0.0.1
           buildMethod: UnityBuilderAction.BuildScript.Build
-          customParameters: -scriptingBackend ${{ matrix.scriptingBackend }} -buildTarget ${{ matrix.targetPlatform }} -customBuildTargetName ${{ matrix.targetPlatform }}
+          customParameters: -scriptingBackend ${{ matrix.scriptingBackend }} -buildTarget ${{ matrix.targetPlatform }}
       - name: Upload file game đã biên dịch
         uses: actions/upload-artifact@v4
         with:
