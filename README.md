@@ -1,12 +1,25 @@
-# Dragonboy-CommunityMod-Builds
-Tự động kiểm tra commit mới và biên dịch [Dragonboy](https://github.com/pk9r327/Dragonboy/tree/Unity-project) bằng Github Actions hàng ngày. Có thể chạy thủ công khi cần thiết.
+# Dragonboy-CommunityMod-Builds - VI | [EN](README-EN.md)
+Tự động checkout và biên dịch [Dragonboy](https://github.com/pk9r327/Dragonboy/tree/Unity-project) bằng GitHub Actions hàng ngày. Có thể chạy thủ công khi cần thiết.
 
-Các nền tảng được hỗ trợ: Windows, Linux, Android.
+Các nền tảng được hỗ trợ: Windows, Linux, Android. Hệ điều hành iOS sẽ không được hỗ trợ do những giới hạn về thực thi mã động được tạo trong thời gian chạy.
 ## Tải xuống
+Có 2 phương pháp để tải xuống:
+<details>
+<summary>Phương pháp 1 (Không yêu cầu tài khoản GitHub): Tải xuống thông qua Release</summary>
+
+- Chọn [Latest build](../../releases/tag/latest) trong phần [Releases](../../releases).
+- Chọn file phù hợp với hệ điều hành của bạn trong phần `Assets`.
+
+</details>
+<details>
+<summary>Phương pháp 2 <u><b>(yêu cầu có tài khoản GitHub)</b></u>: Tải xuống thông qua Artifact</summary>
+
 - Chọn tab [Actions](../../actions) ở trên cùng.
 - Chọn workflow [Biên dịch QLTK và Game](../../actions/workflows/build.yml) ở danh sách workflow bên trái.
 - Chọn `workflow run` chạy thành công mới nhất.
 - Chọn file phù hợp với hệ điều hành của bạn trong phần `Artifacts`.
+  
+</details>
 
 ## Setup
 Để tự build dự án [Dragonboy](https://github.com/pk9r327/Dragonboy/tree/Unity-project) bằng Github Actions, bạn cần làm theo các bước sau:
