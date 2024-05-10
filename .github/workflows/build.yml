@@ -344,7 +344,7 @@ jobs:
     name: Phát hành artiact mới nhất
     runs-on: ubuntu-latest
     needs: [build-Unity-Windows, build-Unity-Linux, build-Unity-Android, build-Account-Manager]
-    if: ${{ !cancelled() && (needs.build-Unity-Windows.result != 'cancelled' && needs.build-Unity-Linux.result != 'cancelled' && needs.build-Unity-Android.result != 'cancelled' && needs.build-Account-Manager.result != 'cancelled')}}
+    if: ${{ !cancelled() && (needs.build-Unity-Windows.result != 'cancelled' && needs.build-Unity-Linux.result != 'cancelled' && needs.build-Unity-Android.result != 'cancelled' && needs.build-Account-Manager.result != 'cancelled') && !(needs.build-Unity-Windows.result == 'skipped' && needs.build-Unity-Linux.result == 'skipped' && needs.build-Unity-Android.result == 'skipped' && needs.build-Account-Manager.result == 'skipped')}}
     permissions:
       contents: write
     outputs:
@@ -378,7 +378,7 @@ jobs:
   send-artifact-links-announcement:
     name: Gửi link artifact tới Discord webhook
     needs: [build-Unity-Windows, build-Unity-Linux, build-Unity-Android, build-Account-Manager, release-latest-artifacts]
-    if: ${{ !cancelled() && (needs.build-Unity-Windows.result != 'cancelled' && needs.build-Unity-Linux.result != 'cancelled' && needs.build-Unity-Android.result != 'cancelled' && needs.build-Account-Manager.result != 'cancelled' && needs.release-latest-artifacts.result != 'cancelled') }}
+    if: ${{ !cancelled() && (needs.build-Unity-Windows.result != 'cancelled' && needs.build-Unity-Linux.result != 'cancelled' && needs.build-Unity-Android.result != 'cancelled' && needs.build-Account-Manager.result != 'cancelled' && needs.release-latest-artifacts.result != 'cancelled') && needs.release-latest-artifacts.result != 'skipped' && !(needs.build-Unity-Windows.result == 'skipped' && needs.build-Unity-Linux.result == 'skipped' && needs.build-Unity-Android.result == 'skipped' && needs.build-Account-Manager.result == 'skipped') }}
     runs-on: windows-latest
     steps:
       - name: Tạo thông báo để gửi tới Discord webhook
@@ -392,28 +392,32 @@ jobs:
           $failure_count = 0;
           if ($buildAccountManager -eq "failure") {$failure_count++} if ($buildUnityLinux -eq "failure") {$failure_count++} if ($buildUnityWindows -eq "failure") {$failure_count++} if ($buildUnityAndroid -eq "failure") {$failure_count++}
           if ($failure_count -eq 4) {$color = 0xff0000} elseif ($failure_count -eq 3) {$color = 0xff5a00} elseif ($failure_count -eq 2)  {$color = 0xffa500} elseif ($failure_count -eq 1) {$color = 0xffff00} else {$color = 0x00ff00}
-          $output = "Kết quả:
-          - Biên dịch QLTK: **${buildAccountManager}**
-          - Biên dịch Game cho HĐH Windows: **${buildUnityWindows}**
-          - Biên dịch Game cho HĐH Linux: **${buildUnityLinux}**
-          - Biên dịch Game cho HĐH Android: **${buildUnityAndroid}**"
+          $output = "Kết quả:";
+          if (${buildAccountManager} != "skipped") 
+          $output += "`r`n- Biên dịch QLTK: **${buildAccountManager}**";
+          if (${buildUnityWindows} != "skipped") 
+            $output += "`r`n- Biên dịch Game cho HĐH Windows: **${buildUnityWindows}**";
+          if (${buildUnityLinux} != "skipped") 
+            $output += "`r`n- Biên dịch Game cho HĐH Linux: **${buildUnityLinux}**";
+          if (${buildUnityAndroid} != "skipped")
+            $output += "`r`n- Biên dịch Game cho HĐH Android: **${buildUnityAndroid}**";
           if ($artifacts.Count -gt 1) {
             $output += "`r`n[Link release mới nhất](${{ needs.release-latest-artifacts.outputs.release-url }})"
             $output += "`r`n$($artifacts.Count) Artifact:"
             }
           for ($i = 0; $i -le $artifacts.Count - 1; $i++) {
-              $output += "`r`n$i. [$($artifacts[$i].name)](${{ github.event.repository.html_url }}/actions/runs/$($artifacts[$i].workflow_run.id)/artifacts/$($artifacts[$i].id))"
+            $output += "`r`n$i. [$($artifacts[$i].name)](${{ github.event.repository.html_url }}/actions/runs/$($artifacts[$i].workflow_run.id)/artifacts/$($artifacts[$i].id))"
           }
           $payload = [PSCustomObject]@{
-              username = "GitHub Actions Webhook"
-              embeds = @(
-                  @{
-                      title = "${{ github.event.repository.name }}"
-                      url = "${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}"
-                      description = $output
-                      color = $color
-                      timestamp = (Get-Date).ToString("yyyy-MM-ddTHH:mm:ssZ")
-                  }
-              )
+            username = "GitHub Actions Webhook"
+            embeds = @(
+              @{
+                title = "${{ github.event.repository.name }}"
+                url = "${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}"
+                description = $output
+                color = $color
+                timestamp = (Get-Date).ToString("yyyy-MM-ddTHH:mm:ssZ")
+              }
+            )
           }
           Invoke-RestMethod -Uri ${{ secrets.DISCORD_WEBHOOK }} -Method Post -Body (ConvertTo-Json $payload) -ContentType "application/json"
