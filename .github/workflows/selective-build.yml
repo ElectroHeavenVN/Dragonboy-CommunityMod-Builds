@@ -450,7 +450,9 @@ jobs:
             $output += "`r`n- Biên dịch Game cho HĐH Android: **${buildUnityAndroid}**";
           }
           if ($artifacts.Count -gt 0) {
-            $output += "`r`n[Link release mới nhất](${{ needs.release-latest-artifacts.outputs.release-url }})"
+            $output += "------------------------------------------------";
+            $output += "`r`n[Latest release](${{ needs.release-latest-artifacts.outputs.release-url }})"
+            $output += "------------------------------------------------";
             $output += "`r`n$($artifacts.Count) Artifact:"
           }
           for ($i = 0; $i -le $artifacts.Count - 1; $i++) {
