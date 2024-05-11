@@ -354,7 +354,7 @@ jobs:
         uses: dawidd6/action-download-artifact@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          workflow_conclusion: success
+          workflow_conclusion: ""
           if_no_artifact_found: warn
           allow_forks: false
           skip_unpack: true
