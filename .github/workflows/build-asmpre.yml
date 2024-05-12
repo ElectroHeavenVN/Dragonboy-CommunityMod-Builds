@@ -13,7 +13,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: pk9r327/Dragonboy
-        ref: AssemblyCSharpPreprocessor
+        ref: AssemblyCSharp-preprocessor
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v2
     - name: Setup NuGet
