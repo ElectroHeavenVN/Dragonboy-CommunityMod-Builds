@@ -68,9 +68,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Lấy hash commit mới nhất của branch Unity-project
+      - name: Lấy hash commit mới nhất
         run: |
-          $commit = git ls-remote https://github.com/pk9r327/Dragonboy.git Unity-project
+          $commit = git ls-remote https://github.com/${{ secrets.SOURCE_CODE_REPOSITORY }}.git Unity-project
           $hash = $commit.Split("`t")[0]
           echo "LATEST_COMMIT=$hash" | Out-File -FilePath $env:GITHUB_ENV -Append
       - name: Cache hash commit
@@ -106,10 +106,10 @@ jobs:
     env:
       Solution-Path: QLTK\QLTK.sln
     steps:
-    - name: Clone pk9r327/Dragonboy branch Unity-project
+    - name: Clone
       uses: actions/checkout@v4
       with:
-        repository: pk9r327/Dragonboy
+        repository: ${{ secrets.SOURCE_CODE_REPOSITORY }}
         ref: Unity-project
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
@@ -144,10 +144,10 @@ jobs:
     permissions:
       actions: write
     steps:
-      - name: Clone pk9r327/Dragonboy branch Unity-project
+      - name: Clone
         uses: actions/checkout@v4
         with:
-          repository: pk9r327/Dragonboy
+          repository: ${{ secrets.SOURCE_CODE_REPOSITORY }}
           ref: Unity-project
       - name: Cache
         id: cache-restore
@@ -156,15 +156,16 @@ jobs:
           path: GameProject/DragonBoy/Library
           key: Library-Windows
       - name: Tải artifact Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
-        uses: dawidd6/action-download-artifact@v3
+        uses: dawidd6/action-download-artifact@v5
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          workflow_search: false
+          workflow_search: true
           workflow_conclusion: success
           if_no_artifact_found: warn
           allow_forks: false
           name: Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
           path: build/${{ matrix.targetPlatform }}
+          workflow: build.yml
       - name: Biên dịch dự án
         if: ${{ matrix.targetPlatform != 'StandaloneWindowsArm64' }}
         uses: game-ci/unity-builder@v4
@@ -233,10 +234,10 @@ jobs:
     permissions:
       actions: write
     steps: 
-      - name: Clone pk9r327/Dragonboy branch Unity-project
+      - name: Clone
         uses: actions/checkout@v4
         with:
-          repository: pk9r327/Dragonboy
+          repository: ${{ secrets.SOURCE_CODE_REPOSITORY }}
           ref: Unity-project
       - name: Cache
         uses: actions/cache@v4
@@ -245,10 +246,10 @@ jobs:
           path: GameProject/DragonBoy/Library
           key: Library-Linux
       - name: Tải artifact Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
-        uses: dawidd6/action-download-artifact@v3
+        uses: dawidd6/action-download-artifact@v5
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          workflow_search: false
+          workflow_search: true
           workflow_conclusion: success
           if_no_artifact_found: warn
           allow_forks: false
@@ -301,10 +302,10 @@ jobs:
     permissions:
       actions: write
     steps: 
-      - name: Clone pk9r327/Dragonboy branch Unity-project
+      - name: Clone
         uses: actions/checkout@v4
         with:
-          repository: pk9r327/Dragonboy
+          repository: ${{ secrets.SOURCE_CODE_REPOSITORY }}
           ref: Unity-project
       - name: Giải phóng bộ nhớ 
         uses: jlumbroso/free-disk-space@v1.3.1
@@ -323,10 +324,10 @@ jobs:
           path: GameProject/DragonBoy/Library
           key: Library-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
       - name: Tải artifact Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
-        uses: dawidd6/action-download-artifact@v3
+        uses: dawidd6/action-download-artifact@v5
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          workflow_search: false
+          workflow_search: true
           workflow_conclusion: success
           if_no_artifact_found: warn
           allow_forks: false
@@ -395,7 +396,7 @@ jobs:
       release-url: ${{ steps.release-artifacts.outputs.url }}
     steps:
       - name: Tải artifact mới nhất
-        uses: dawidd6/action-download-artifact@v3
+        uses: dawidd6/action-download-artifact@v5
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           workflow_conclusion: ""
@@ -424,11 +425,16 @@ jobs:
     needs: [build-Unity-Windows, build-Unity-Linux, build-Unity-Android, build-Account-Manager, release-latest-artifacts]
     if: ${{ !cancelled() && (needs.build-Unity-Windows.result != 'cancelled' && needs.build-Unity-Linux.result != 'cancelled' && needs.build-Unity-Android.result != 'cancelled' && needs.build-Account-Manager.result != 'cancelled' && needs.release-latest-artifacts.result != 'cancelled') && needs.release-latest-artifacts.result != 'skipped' && !(needs.build-Unity-Windows.result == 'skipped' && needs.build-Unity-Linux.result == 'skipped' && needs.build-Unity-Android.result == 'skipped' && needs.build-Account-Manager.result == 'skipped') && github.event.inputs.send-artifact-links-announcement == 'true' }}
     runs-on: windows-latest
+    env:
+      DISCORD_WEBHOOK: ${{ github.event.inputs.discord-webhook }}
     steps:
       - name: Tạo thông báo để gửi tới Discord webhook
+        if:  ${{ env.DISCORD_WEBHOOK != '' }}
         run: |
-          $artifactsAPIUrl = (Invoke-RestMethod -Uri "https://api.github.com/repos/${{ github.repository }}/actions/workflows/selective-build.yml/runs?per_page=1" -Headers @{Authorization = "Bearer ${{ secrets.GITHUB_TOKEN }}"}).workflow_runs[0].artifacts_url
-          $artifacts = (Invoke-RestMethod -Uri $artifactsAPIUrl -Headers @{Authorization = "Bearer ${{ secrets.GITHUB_TOKEN }}"}).artifacts
+          $workflow_ref = "${{ github.workflow_ref }}".Substring(0, "${{ github.workflow_ref }}".IndexOf('@'));
+          $workflowFile = $workflow_ref.Split('/')[-1];
+          $artifactsAPIUrl = (Invoke-RestMethod -Uri "https://api.github.com/repos/${{ github.repository }}/actions/workflows/${workflowFile}/runs?per_page=1" -Headers @{Authorization = "Bearer ${{ secrets.GITHUB_TOKEN }}"}).workflow_runs[0].artifacts_url;
+          $artifacts = (Invoke-RestMethod -Uri $artifactsAPIUrl -Headers @{Authorization = "Bearer ${{ secrets.GITHUB_TOKEN }}"}).artifacts;
           $buildAccountManager="${{ needs.build-Account-Manager.result }}";
           $buildUnityLinux="${{ needs.build-Unity-Linux.result }}";
           $buildUnityWindows="${{ needs.build-Unity-Windows.result }}";
@@ -470,4 +476,4 @@ jobs:
               }
             )
           }
-          Invoke-RestMethod -Uri ${{ github.event.inputs.discord-webhook }} -Method Post -Body (ConvertTo-Json $payload) -ContentType "application/json"
+          Invoke-RestMethod -Uri ${{ env.DISCORD_WEBHOOK }} -Method Post -Body (ConvertTo-Json $payload) -ContentType "application/json"

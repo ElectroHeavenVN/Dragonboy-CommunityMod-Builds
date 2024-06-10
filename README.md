@@ -22,14 +22,15 @@ Có 2 phương pháp để tải xuống:
 </details>
 
 ## Setup
-Để tự build dự án [Dragonboy](https://github.com/pk9r327/Dragonboy/tree/Unity-project) bằng Github Actions, bạn cần làm theo các bước sau:
+Để tự biên dịch dự án [Dragonboy](https://github.com/pk9r327/Dragonboy/tree/Unity-project) hoặc fork của riêng bạn bằng Github Actions, bạn cần làm theo các bước sau:
 - Fork repository này
 - Vào phần `Settings` của repository bạn vừa fork, sau đó chọn phần `Actions` trong phần `Secrets and variables`.
 - Tại phần `Repository secrets`, nhấn `New repository secrets`.
-- Ở trường `Name`, nhập `UNITY_EMAIL`, trường `Secret` nhập email Unity của bạn.
-- Nhấn `Add secret` để thêm secret.
+- Ở trường `Name`, nhập `SOURCE_CODE_REPOSITORY`, trường `Secret` nhập `pk9r327/Dragonboy`, hoặc đường dẫn tới fork của bạn (nếu bạn muốn biên dịch từ fork của riêng bạn).
+- Nhấn `Add secret`.
 - Làm lại các bước trên với giá trị của trường `Name` và trường `Secret` lần lượt như sau:
-    + `UNITY_PASSWORD`: mật khẩu Unity của bạn
+    + `UNITY_EMAIL`: email bạn dùng để tạo tài khoản Unity
+    + `UNITY_PASSWORD`: mật khẩu tài khoản Unity của bạn
     + `UNITY_LICENSE`: nội dung tệp `Unity_lic.ulf` (tham khảo tài liệu của [GameCI](https://game.ci/) [tại đây](https://game.ci/docs/github/activation/#activating-a-license-file) để biết đường dẫn tệp `Unity_lic.ulf`)
     + `ANDROID_KEYSTORE_BASE64`: nội dung tệp keystore đã mã hóa base64 của bạn
     + `ANDROID_KEYSTORE_PASS`: mật khẩu keystore của bạn
