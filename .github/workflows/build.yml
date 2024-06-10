@@ -24,9 +24,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Lấy hash commit mới nhất của branch Unity-project
+      - name: Lấy hash commit mới nhất
         run: |
-          $commit = git ls-remote https://github.com/${{ secrets.SOURCE_CODE_REPOSITORY }}.git Unity-project
+          $commit = git ls-remote https://github.com/${{ secrets.SOURCE_CODE_REPOSITORY }}.git ${{ secrets.SOURCE_CODE_BRANCH }}
           $hash = $commit.Split("`t")[0]
           echo "LATEST_COMMIT=$hash" | Out-File -FilePath $env:GITHUB_ENV -Append
       - name: Cache hash commit
@@ -66,7 +66,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: ${{ secrets.SOURCE_CODE_REPOSITORY }}
-        ref: Unity-project
+        ref: ${{ secrets.SOURCE_CODE_BRANCH }}
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
     - name: Setup NuGet
@@ -104,7 +104,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ${{ secrets.SOURCE_CODE_REPOSITORY }}
-          ref: Unity-project
+          ref: ${{ secrets.SOURCE_CODE_BRANCH }}
       - name: Cache
         id: cache-restore
         uses: actions/cache@v4
@@ -193,7 +193,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ${{ secrets.SOURCE_CODE_REPOSITORY }}
-          ref: Unity-project
+          ref: ${{ secrets.SOURCE_CODE_BRANCH }}
       - name: Cache
         uses: actions/cache@v4
         id: cache-restore
@@ -261,7 +261,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ${{ secrets.SOURCE_CODE_REPOSITORY }}
-          ref: Unity-project
+          ref: ${{ secrets.SOURCE_CODE_BRANCH }}
       - name: Giải phóng bộ nhớ 
         uses: jlumbroso/free-disk-space@v1.3.1
       - name: Cache
