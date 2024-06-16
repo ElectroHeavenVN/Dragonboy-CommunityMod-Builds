@@ -39,7 +39,18 @@ Có 2 phương pháp để tải xuống:
     + `ANDROID_KEYALIAS_PASS`: mật khẩu alias trong tệp keystore của bạn
     + (Tùy chọn) `DISCORD_WEBHOOK`: URL Webhook Discord để thông báo kết quả biên dịch
 
-Tham khảo phần [Deploy to Google Play](https://game.ci/docs/github/deployment/android/) của [GameCI](https://game.ci/) để biết thêm thông tin về phần keystore của Android.
+    <sub>**Tham khảo phần [Deploy to Google Play](https://game.ci/docs/github/deployment/android/) của [GameCI](https://game.ci/) để biết thêm thông tin về phần keystore của Android.**</sub>
+
+- Kích hoạt workflow [`build.yml`](.github/workflows/build.yml) trong fork của bạn (nếu bạn muốn tự động biên dịch):
+    + Chọn workflow [Biên dịch QLTK và Game](../../actions/workflows/build.yml)
+    + Nhấn `Enable workflow`
+- Chạy workflow [`selective-build.yml`](.github/workflows/selective-build.yml) (nếu bạn muốn chạy thủ công):
+    + Chọn workflow [Biên dịch QLTK và Game (selective)](../../actions/workflows/selective-build.yml)
+    + Nhấn `Run workflow`
+    + Chọn hộp kiểm và nhập đường dẫn webhook theo ý của bạn
+    + Nhấn `Run workflow` ở bên dưới
+
+Các workflow thường chạy trong khoảng 20 - 50 phút, tùy theo lượng code bạn sửa so với lần biên dịch trước đó. Lần chạy đầu tiên thường sẽ mất nhiều thời gian nhất. Sau khi workflow chạy xong, bạn có thể tải các `artifact` theo hướng dẫn trong phần [Tải xuống](#tải-xuống).
 
 ---
 #### Bạn có thắc mắc hay gặp phải vấn đề? Hãy cho tôi biết! Bạn có thể tạo issue tại đây hoặc yêu cầu trợ giúp trong [Server Discord](https://discord.gg/mYtgWabd33) của [pk9r327](https://github.com/pk9r327).
