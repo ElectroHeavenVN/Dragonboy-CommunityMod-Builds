@@ -44,10 +44,10 @@ To build the [Dragonboy](https://github.com/pk9r327/Dragonboy/tree/Unity-project
 - Activate [`build.yml`](.github/workflows/build.yml) in your fork (if you want to automate the build):
     + Select workflow [Biên dịch QLTK và Game](../../actions/workflows/build.yml)
     + Click `Enable workflow`
-- Run [`selective-build.yml`](.github/workflows/selective-build.yml) (if you want to build manually):
-    + Select workflow [Biên dịch QLTK và Game (selective)](../../actions/workflows/selective-build.yml)
+- Run [`build.yml`](.github/workflows/build.yml) or [`selective-build.yml`](.github/workflows/selective-build.yml) (if you want to build manually):
+    + Select workflow [Biên dịch QLTK và Game](../../actions/workflows/build.yml) or [Biên dịch QLTK và Game (selective)](../../actions/workflows/selective-build.yml)
     + Click `Run workflow`
-    + Select checkboxes and type in the webhook link according to your preferences
+    + Select checkboxes and type in the webhook link according (if present) to your preferences
     + Select `Run workflow` at the bottom
 
 Workflows usually run for about 20 - 50 minutes, depending on the amount of code you modified compared to the previous compilation. The first run will usually take the longest. Once the workflow has finished running, you can download the `artifacts` according to the guide in the [Download](#download) section.
