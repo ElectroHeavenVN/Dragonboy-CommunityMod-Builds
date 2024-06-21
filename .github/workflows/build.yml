@@ -57,6 +57,8 @@ jobs:
     runs-on: windows-latest
     if: needs.check-new-commit.outputs.cancel == 'true'
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
       - name: Hủy workflow hiện tại
         run: gh run cancel ${{ github.run_id }}
         env:
