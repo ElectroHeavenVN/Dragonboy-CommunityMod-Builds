@@ -51,6 +51,14 @@ jobs:
         with: 
           path: latest-commit.txt
           key: ${{ env.cache-key }}
+  cancel-current-workflow:
+    name: Hủy workflow hiện tại
+    needs: [check-new-commit]
+    runs-on: windows-latest
+    if: needs.check-new-commit.outputs.cancel == 'true'
+    steps:
+      - name: Hủy workflow hiện tại
+        run: gh run cancel ${{ github.run_id }} --token ${{ secrets.GITHUB_TOKEN }}
   build-Account-Manager:
     name: Biên dịch QLTK
     needs: [check-new-commit]
