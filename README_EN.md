@@ -29,7 +29,7 @@ To build the [Dragonboy](https://github.com/pk9r327/Dragonboy/tree/Unity-project
 - In the `Name` field, enter `SOURCE_CODE_REPOSITORY`, and in the `Secret` field, enter `pk9r327/Dragonboy`, or the path to your fork (if you want to compile the game from your own fork).
 - Click `Add secret` to add the secret.
 - Repeat the above steps with the values of the `Name` field and `Secret` field as follows:
-    + `SOURCE_CODE_BRANCH`: branch you want to compile, if the `SOURCE_CODE_REPOSITORY` secret value is `pk9r327/Dragonboy` then enter `Unity-project`
+    + `SOURCE_CODE_BRANCH`: branch you want to compile, if the `SOURCE_CODE_REPOSITORY` secret value is `pk9r327/Dragonboy` then enter `master`
     + `UNITY_EMAIL`: the email you used to create your Unity account
     + `UNITY_PASSWORD`: your Unity account password
     + `UNITY_LICENSE`: the content of the `Unity_lic.ulf` file (refer to the [GameCI](https://game.ci/)'s documentation [here](https://game.ci/docs/github/activation/#activating-a-license-file) for the path to the `Unity_lic.ulf` file)

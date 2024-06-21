@@ -29,7 +29,7 @@ Có 2 phương pháp để tải xuống:
 - Ở trường `Name`, nhập `SOURCE_CODE_REPOSITORY`, trường `Secret` nhập `pk9r327/Dragonboy`, hoặc đường dẫn tới fork của bạn (nếu bạn muốn biên dịch từ fork của riêng bạn).
 - Nhấn `Add secret`.
 - Làm lại các bước trên với giá trị của trường `Name` và trường `Secret` lần lượt như sau:
-    + `SOURCE_CODE_BRANCH`: nhánh bạn muốn biên dịch, nếu phần `SOURCE_CODE_REPOSITORY` có giá trị là `pk9r327/Dragonboy` thì nhập `Unity-project`
+    + `SOURCE_CODE_BRANCH`: nhánh bạn muốn biên dịch, nếu phần `SOURCE_CODE_REPOSITORY` có giá trị là `pk9r327/Dragonboy` thì nhập `master`
     + `UNITY_EMAIL`: email bạn dùng để tạo tài khoản Unity
     + `UNITY_PASSWORD`: mật khẩu tài khoản Unity của bạn
     + `UNITY_LICENSE`: nội dung tệp `Unity_lic.ulf` (tham khảo tài liệu của [GameCI](https://game.ci/) [tại đây](https://game.ci/docs/github/activation/#activating-a-license-file) để biết đường dẫn tệp `Unity_lic.ulf`)
