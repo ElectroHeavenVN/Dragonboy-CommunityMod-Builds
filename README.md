@@ -1,5 +1,5 @@
 # Dragonboy-CommunityMod-Builds - VI | [EN](README_EN.md)
-Tự động checkout và biên dịch [Dragonboy](https://github.com/pk9r327/Dragonboy/tree/Unity-project) bằng GitHub Actions hàng ngày. Có thể chạy thủ công khi cần thiết.
+Tự động checkout và biên dịch [Dragonboy](https://github.com/pk9r327/Dragonboy/) bằng GitHub Actions hàng ngày. Có thể chạy thủ công khi cần thiết.
 
 Các nền tảng được hỗ trợ: Windows, Linux, Android. Hệ điều hành iOS sẽ không được hỗ trợ do những giới hạn về thực thi mã động được tạo trong thời gian chạy.
 ## Tải xuống
@@ -22,7 +22,7 @@ Có 2 phương pháp để tải xuống:
 </details>
 
 ## Setup
-Để tự biên dịch dự án [Dragonboy](https://github.com/pk9r327/Dragonboy/tree/Unity-project) hoặc fork của riêng bạn bằng Github Actions, bạn cần làm theo các bước sau:
+Để tự biên dịch dự án [Dragonboy](https://github.com/pk9r327/Dragonboy/) hoặc fork của riêng bạn bằng Github Actions, bạn cần làm theo các bước sau:
 - Fork repository này
 - Vào phần `Settings` của repository bạn vừa fork, sau đó chọn phần `Actions` trong phần `Secrets and variables`.
 - Tại phần `Repository secrets`, nhấn `New repository secrets`.
