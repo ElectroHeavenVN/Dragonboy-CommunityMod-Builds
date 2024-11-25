@@ -156,7 +156,7 @@ jobs:
           path: GameProject/DragonBoy/Library
           key: Library-Windows
       - name: Tải artifact Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
-        uses: dawidd6/action-download-artifact@v5
+        uses: dawidd6/action-download-artifact@v6
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           workflow_search: true
@@ -246,7 +246,7 @@ jobs:
           path: GameProject/DragonBoy/Library
           key: Library-Linux
       - name: Tải artifact Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
-        uses: dawidd6/action-download-artifact@v5
+        uses: dawidd6/action-download-artifact@v6
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           workflow_search: true
@@ -324,7 +324,7 @@ jobs:
           path: GameProject/DragonBoy/Library
           key: Library-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
       - name: Tải artifact Build-${{ matrix.targetPlatform }}-${{ matrix.scriptingBackend }}
-        uses: dawidd6/action-download-artifact@v5
+        uses: dawidd6/action-download-artifact@v6
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           workflow_search: true
@@ -396,7 +396,7 @@ jobs:
       release-url: ${{ steps.release-artifacts.outputs.url }}
     steps:
       - name: Tải artifact mới nhất
-        uses: dawidd6/action-download-artifact@v5
+        uses: dawidd6/action-download-artifact@v6
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           workflow_conclusion: ""

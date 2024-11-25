@@ -8,7 +8,7 @@ jobs:
       contents: write
     steps:
       - name: Tải artifact mới nhất
-        uses: dawidd6/action-download-artifact@v5
+        uses: dawidd6/action-download-artifact@v6
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           workflow: build.yml
