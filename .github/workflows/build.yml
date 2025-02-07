@@ -1,7 +1,7 @@
 name: Biên dịch QLTK và Game
 on:
-  schedule:
-    - cron: "0 0 * * *"
+  # schedule:
+  #   - cron: "0 0 * * *"
   workflow_dispatch:
 permissions:
   actions: write
